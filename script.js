@@ -86,8 +86,8 @@
 
         const channels = {
             '1': { name: 'EMAIL', url: 'mailto:ramadanzah205@gmail.com' },
-            '2': { name: 'GITHUB', url: 'https://github.com/Ramadanzah-dev' },
-            '3': { name: 'WHATSAPP', url: 'https://wa.me/625117726607' }
+            '2': { name: 'GITHUB', url: 'https://github.com/ramadanzah-dev' },
+            '3': { name: 'WHATSAPP', url: 'https://wa.me/6285117726607' }
         };
 
         async function addLine(text, color = "text-slate-300", delay = 100) {
