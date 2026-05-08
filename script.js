@@ -106,18 +106,28 @@
             
             await addLine("$ initializing contact_protocol...", "text-slate-500", 400);
             
-            // --- LOGIKA PROGRESS BAR BARU ---
+            // 1. Animasi Progress Bar (0% - 100%)
             const loadingLine = await addLine("LOADING modules <span class='spinner'></span> [          ] 0%", "text-emerald-500", 0);
-            
             for (let i = 1; i <= 10; i++) {
-                await new Promise(r => setTimeout(r, 150)); // Kecepatan loading (150ms)
+                await new Promise(r => setTimeout(r, 100));
                 const dots = "#".repeat(i).padEnd(10, " ");
                 loadingLine.innerHTML = `LOADING modules <span class='spinner'></span> [${dots}] ${i * 10}%`;
             }
-            // --------------------------------
-            
-            await addLine("RUNNING ask_project.sh...", "text-blue-400", 500);
+
+            // 2. ANIMASI TITIK-TITIK PADA SCRIPT
+            const scriptLine = await addLine("RUNNING ask_project.sh", "text-blue-400", 0);
+            for (let i = 0; i < 6; i++) { // Mengulang animasi titik 6 kali
+                await new Promise(r => setTimeout(r, 300));
+                let dots = ".".repeat(i % 4); // Akan menghasilkan "", ".", "..", "..."
+                scriptLine.innerHTML = `RUNNING ask_project.sh${dots}`;
+            }
+            // Set teks permanen setelah animasi selesai
+            scriptLine.innerHTML = `RUNNING ask_project.sh...`;
+
+            // 3. Tampilkan DONE
             await addLine("DONE. Remote link system active.", "text-emerald-400", 300);
+            
+            // ... sisa kode menu (CHOOSE CHANNEL dll) ...
             await addLine("<br>--- CHOOSE CHANNEL ---", "text-white", 0);
             await addLine("[1] EMAIL_INVITE", "text-amber-400", 100);
             await addLine("[2] GITHUB_REPO", "text-amber-400", 100);
