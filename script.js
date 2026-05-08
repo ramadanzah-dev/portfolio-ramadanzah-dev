@@ -105,7 +105,17 @@
             termInputLine.style.display = "none";
             
             await addLine("$ initializing contact_protocol...", "text-slate-500", 400);
-            await addLine("LOADING modules <span class='spinner'></span> [##########] 100%", "text-emerald-500", 800);
+            
+            // --- LOGIKA PROGRESS BAR BARU ---
+            const loadingLine = await addLine("LOADING modules <span class='spinner'></span> [          ] 0%", "text-emerald-500", 0);
+            
+            for (let i = 1; i <= 10; i++) {
+                await new Promise(r => setTimeout(r, 150)); // Kecepatan loading (150ms)
+                const dots = "#".repeat(i).padEnd(10, " ");
+                loadingLine.innerHTML = `LOADING modules <span class='spinner'></span> [${dots}] ${i * 10}%`;
+            }
+            // --------------------------------
+            
             await addLine("RUNNING ask_project.sh...", "text-blue-400", 500);
             await addLine("DONE. Remote link system active.", "text-emerald-400", 300);
             await addLine("<br>--- CHOOSE CHANNEL ---", "text-white", 0);
