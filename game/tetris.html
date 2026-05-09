@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Retro - Old but Gold</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" href="../img/-_-.png" type="image/x-icon">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-pink: #ff00ff;
+            --retro-bg: #050505;
+        }
+
+        body {
+            background-color: var(--retro-bg);
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+            image-rendering: pixelated;
+        }
+
+        /* Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 100;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .retro-border {
+            border: 4px solid #fff;
+            box-shadow: 4px 4px 0px #555, inset 4px 4px 0px #222;
+        }
+
+        .pixel-btn {
+            background: #222;
+            border: 4px solid #fff;
+            box-shadow: 4px 4px 0px #555;
+            transition: all 0.1s;
+            position: relative;
+        }
+
+        .pixel-btn:active {
+            box-shadow: 0px 0px 0px;
+            transform: translate(4px, 4px);
+        }
+
+        .pixel-btn-red { border-color: #ff4d4d; color: #ff4d4d; }
+        .pixel-btn-blue { border-color: var(--neon-blue); color: var(--neon-blue); }
+
+        canvas {
+            background-color: #000;
+            display: block;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .shake { animation: shake 0.2s; }
+        .hidden-screen { display: none !important; }
+        .text-glow { text-shadow: 0 0 10px var(--neon-blue); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <!-- LOBBY SCREEN -->
+    <div id="lobby-screen" class="z-20 flex flex-col items-center justify-center p-10 bg-black retro-border text-center">
+        <h1 class="text-4xl md:text-6xl mb-10 text-glow leading-tight">ONLY<br>TETRIS</h1>
+        <p class="mb-10 text-[10px] text-gray-500 italic uppercase">Old but Gold</p>
+        
+        <div class="flex flex-col gap-6 w-64">
+            <button id="start-btn" class="pixel-btn pixel-btn-blue py-4 font-bold text-sm uppercase">Main Sekarang</button>
+            <button id="exit-portofolio-btn" class="pixel-btn pixel-btn-red py-4 font-bold text-sm uppercase">Keluar</button>
+        </div>
+        
+        <div class="mt-10 p-4 border-2 border-dashed border-gray-700">
+            <p class="text-[8px] text-gray-400">SKOR TERBAIK: <span id="lobby-highscore">0</span></p>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="hidden-screen z-10 flex flex-col md:flex-row gap-8 items-start relative">
+        
+        <!-- Panel Kiri -->
+        <div class="flex flex-col gap-4">
+            <div class="retro-border bg-black p-4 w-40">
+                <p class="text-[8px] mb-2 text-gray-400">SKOR</p>
+                <p id="score" class="text-xl">0</p>
+            </div>
+            <div class="retro-border bg-black p-4 w-40">
+                <p class="text-[8px] mb-2 text-gray-400">LEVEL</p>
+                <p id="level" class="text-xl">1</p>
+            </div>
+            <button id="pause-btn" class="pixel-btn py-2 text-[10px] uppercase">Pause</button>
+        </div>
+
+        <!-- Kanvas Tengah -->
+        <div id="canvas-container" class="retro-border relative">
+            <canvas id="tetris" width="300" height="600"></canvas>
+            
+            <!-- Overlay Pause -->
+            <div id="pause-overlay" class="hidden-screen absolute inset-0 bg-black/80 z-30 flex flex-col items-center justify-center">
+                <h2 class="text-xl mb-8">BERHENTI SEJENAK</h2>
+                <button id="resume-btn" class="pixel-btn pixel-btn-blue px-6 py-3 mb-4 w-44 text-[10px]">LANJUTKAN</button>
+                <button id="quit-btn" class="pixel-btn pixel-btn-red px-6 py-3 w-44 text-[10px]">KE MENU</button>
+            </div>
+
+            <!-- Overlay Game Over -->
+            <div id="gameover-overlay" class="hidden-screen absolute inset-0 bg-black/90 z-40 flex flex-col items-center justify-center text-center p-4">
+                <h2 class="text-xl mb-4 text-red-500">GAME OVER</h2>
+                <p class="text-[8px] mb-2">SKOR AKHIR:</p>
+                <p id="final-score" class="text-2xl mb-8">0</p>
+                <button id="restart-btn" class="pixel-btn pixel-btn-blue px-6 py-3 mb-4 w-44 text-[10px]">MAIN LAGI</button>
+                <button id="lobby-btn" class="pixel-btn px-6 py-3 w-44 text-[10px]">KE MENU</button>
+            </div>
+        </div>
+
+        <!-- Panel Kanan -->
+        <div class="flex flex-col gap-4">
+            <div class="retro-border bg-black p-4 w-40">
+                <p class="text-[8px] mb-2 text-gray-400 text-center uppercase">BERIKUTNYA</p>
+                <div class="flex justify-center">
+                    <canvas id="next" width="80" height="80"></canvas>
+                </div>
+            </div>
+            
+            <!-- Mobile Controls -->
+            <div class="grid grid-cols-3 gap-2 md:hidden">
+                <button id="m-left" class="pixel-btn p-4">←</button>
+                <button id="m-rotate" class="pixel-btn p-4">↻</button>
+                <button id="m-right" class="pixel-btn p-4">→</button>
+                <button id="m-drop" class="pixel-btn p-4 col-span-3 text-[10px]">BAMMM!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('tetris');
+        const ctx = canvas.getContext('2d');
+        const nextCanvas = document.getElementById('next');
+        const nCtx = nextCanvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        const ROW = 20, COL = 10, SQ = 30;
+        const COLORS = [null, '#00f2ff', '#0044ff', '#ff8800', '#ffff00', '#00ff00', '#9d00ff', '#ff0000'];
+
+        const PIECES = [
+            null,
+            [[[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]], [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]]],
+            [[[1,0,0],[1,1,1],[0,0,0]], [[0,1,1],[0,1,0],[0,1,0]], [[1,1,1],[0,0,1],[0,0,0]], [[0,1,0],[0,1,0],[1,1,0]]],
+            [[[0,0,1],[1,1,1],[0,0,0]], [[0,1,0],[0,1,0],[0,1,1]], [[1,1,1],[1,0,0],[0,0,0]], [[1,1,0],[0,1,0],[0,1,0]]],
+            [[[1,1],[1,1]]],
+            [[[0,1,1],[1,1,0],[0,0,0]], [[0,1,0],[0,1,1],[0,0,1]]],
+            [[[0,1,0],[1,1,1],[0,0,0]], [[0,1,0],[0,1,1],[0,1,0]], [[1,1,1],[0,1,0],[0,0,0]], [[0,1,0],[1,1,0],[0,1,0]]],
+            [[[1,1,0],[0,1,1],[0,0,0]], [[0,0,1],[0,1,1],[0,1,0]]]
+        ];
+
+        let board = [], score = 0, level = 1, lines = 0, gameRunning = false, isPaused = false;
+        let dropCounter = 0, dropInterval = 1000, lastTime = 0, p, nextP;
+        let hs = localStorage.getItem('retroTetrisHS') || 0;
+        document.getElementById('lobby-highscore').innerText = hs;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function beep(f, d, type='square', v=0.05) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(v, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime + d);
+        }
+
+        function initBoard() {
+            board = Array.from({length: ROW}, () => Array(COL).fill(0));
+        }
+
+        function drawSquare(x, y, color, targetCtx = ctx, size = SQ) {
+            targetCtx.fillStyle = color === 0 ? '#000' : color;
+            targetCtx.fillRect(x*size, y*size, size, size);
+            if(color !== 0) {
+                targetCtx.strokeStyle = '#000';
+                targetCtx.lineWidth = 2;
+                targetCtx.strokeRect(x*size, y*size, size, size);
+                targetCtx.fillStyle = 'rgba(255,255,255,0.3)';
+                targetCtx.fillRect(x*size+2, y*size+2, size-4, 4);
+                targetCtx.fillRect(x*size+2, y*size+2, 4, size-4);
+            } else {
+                targetCtx.strokeStyle = '#111';
+                targetCtx.lineWidth = 1;
+                targetCtx.strokeRect(x*size, y*size, size, size);
+            }
+        }
+
+        function drawBoard() {
+            for(let r=0; r<ROW; r++) for(let c=0; c<COL; c++) drawSquare(c, r, board[r][c] ? COLORS[board[r][c]] : 0);
+        }
+
+        class Piece {
+            constructor(type) {
+                this.type = type; this.patterns = PIECES[type]; this.color = COLORS[type];
+                this.patternIdx = 0; this.activePattern = this.patterns[0];
+                this.x = 3; this.y = -2;
+            }
+            draw(tCtx = ctx, size = SQ, ox=0, oy=0) {
+                this.activePattern.forEach((row, r) => {
+                    row.forEach((v, c) => {
+                        if(v) drawSquare(this.x + c + ox, this.y + r + oy, this.color, tCtx, size);
+                    });
+                });
+            }
+            collision(nx, ny, np) {
+                for(let r=0; r<np.length; r++) {
+                    for(let c=0; c<np[r].length; c++) {
+                        if(!np[r][c]) continue;
+                        let x = this.x + c + nx, y = this.y + r + ny;
+                        if(x<0 || x>=COL || y>=ROW) return true;
+                        if(y<0) continue;
+                        if(board[y][x]) return true;
+                    }
+                }
+                return false;
+            }
+            lock() {
+                this.activePattern.forEach((row, r) => {
+                    row.forEach((v, c) => {
+                        if(v) {
+                            if(this.y + r < 0) { handleGameOver(); return; }
+                            board[this.y+r][this.x+c] = this.type;
+                        }
+                    });
+                });
+                if(!gameRunning) return;
+                checkLines();
+                spawnPiece();
+                beep(200, 0.1);
+            }
+        }
+
+        function spawnPiece() {
+            if(!nextP) nextP = new Piece(Math.floor(Math.random()*7)+1);
+            p = nextP; nextP = new Piece(Math.floor(Math.random()*7)+1);
+            nCtx.clearRect(0,0,80,80);
+            const temp = new Piece(nextP.type); temp.x = 0; temp.y = 0;
+            temp.draw(nCtx, 20, (80 - temp.activePattern[0].length*20)/(2*20), (80 - temp.activePattern.length*20)/(2*20));
+        }
+
+        function checkLines() {
+            let cleared = 0;
+            for(let r=ROW-1; r>=0; r--) {
+                if(board[r].every(v => v !== 0)) {
+                    board.splice(r,1); board.unshift(new Array(COL).fill(0));
+                    cleared++; r++;
+                }
+            }
+            if(cleared > 0) {
+                score += [0, 100, 300, 500, 1200][cleared] * level;
+                lines += cleared; level = Math.floor(lines/10) + 1;
+                dropInterval = Math.max(100, 1000 - (level-1)*100);
+                document.getElementById('score').innerText = score;
+                document.getElementById('level').innerText = level;
+                beep(600, 0.4, 'triangle', 0.1);
+            }
+        }
+
+        function handleGameOver() {
+            gameRunning = false;
+            if(score > hs) { localStorage.setItem('retroTetrisHS', score); hs = score; }
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('gameover-overlay').classList.remove('hidden-screen');
+            beep(100, 0.5, 'sawtooth', 0.2);
+        }
+
+        function update(time = 0) {
+            if(!gameRunning || isPaused) return;
+            const dt = time - lastTime; lastTime = time;
+            dropCounter += dt;
+            if(dropCounter > dropInterval) {
+                if(!p.collision(0,1,p.activePattern)) { p.y++; } else { p.lock(); }
+                dropCounter = 0;
+            }
+            ctx.clearRect(0,0,300,600);
+            drawBoard();
+            if(p) p.draw();
+            requestAnimationFrame(update);
+        }
+
+        function bamDrop() {
+            if(!gameRunning || isPaused) return;
+            while(!p.collision(0,1,p.activePattern)) { p.y++; }
+            p.lock();
+            container.classList.remove('shake');
+            void container.offsetWidth;
+            container.classList.add('shake');
+            beep(80, 0.3, 'sawtooth', 0.2);
+        }
+
+        // Navigasi UI
+        function resetToLobby() {
+            gameRunning = false;
+            isPaused = false;
+            document.getElementById('game-screen').classList.add('hidden-screen');
+            document.getElementById('pause-overlay').classList.add('hidden-screen');
+            document.getElementById('gameover-overlay').classList.add('hidden-screen');
+            document.getElementById('lobby-screen').classList.remove('hidden-screen');
+            document.getElementById('lobby-highscore').innerText = localStorage.getItem('retroTetrisHS') || 0;
+        }
+
+        function startNewGame() {
+            document.getElementById('lobby-screen').classList.add('hidden-screen');
+            document.getElementById('gameover-overlay').classList.add('hidden-screen');
+            document.getElementById('game-screen').classList.remove('hidden-screen');
+            initBoard(); 
+            score = 0; level = 1; lines = 0; dropInterval = 1000;
+            document.getElementById('score').innerText = "0";
+            document.getElementById('level').innerText = "1";
+            isPaused = false; 
+            nextP = null; spawnPiece(); 
+            gameRunning = true; 
+            lastTime = performance.now(); 
+            update();
+        }
+
+        // Event Listeners
+        document.getElementById('start-btn').onclick = startNewGame;
+        document.getElementById('restart-btn').onclick = startNewGame;
+        document.getElementById('lobby-btn').onclick = resetToLobby;
+        document.getElementById('quit-btn').onclick = resetToLobby;
+
+        document.getElementById('exit-portofolio-btn').onclick = () => {
+            // Ubah link ini ke homepage portofolio kamu
+            window.location.href = '../game.html#projects';
+        };
+
+        document.getElementById('pause-btn').onclick = () => {
+            if(!gameRunning) return;
+            isPaused = !isPaused;
+            document.getElementById('pause-overlay').classList.toggle('hidden-screen');
+            if(!isPaused) { lastTime = performance.now(); update(); }
+        };
+
+        document.getElementById('resume-btn').onclick = () => {
+            isPaused = false;
+            document.getElementById('pause-overlay').classList.add('hidden-screen');
+            lastTime = performance.now();
+            update();
+        };
+
+        // Kontrol Keyboard
+        document.addEventListener('keydown', e => {
+            if(!gameRunning || isPaused) return;
+            if(e.key === 'ArrowLeft' && !p.collision(-1,0,p.activePattern)) { p.x--; beep(400, 0.05); }
+            if(e.key === 'ArrowRight' && !p.collision(1,0,p.activePattern)) { p.x++; beep(400, 0.05); }
+            if(e.key === 'ArrowDown' && !p.collision(0,1,p.activePattern)) { p.y++; }
+            if(e.key === 'ArrowUp') { 
+                let next = (p.patternIdx + 1) % p.patterns.length;
+                if(!p.collision(0,0,p.patterns[next])) { p.patternIdx = next; p.activePattern = p.patterns[next]; beep(500, 0.05); }
+            }
+            if(e.key === ' ') { e.preventDefault(); bamDrop(); }
+            if(e.key.toLowerCase() === 'p') document.getElementById('pause-btn').click();
+        });
+
+        // Kontrol Mobile
+        document.getElementById('m-left').onclick = () => !p.collision(-1,0,p.activePattern) && (p.x--, beep(400,0.05));
+        document.getElementById('m-right').onclick = () => !p.collision(1,0,p.activePattern) && (p.x++, beep(400,0.05));
+        document.getElementById('m-rotate').onclick = () => {
+            let next = (p.patternIdx + 1) % p.patterns.length;
+            if(!p.collision(0,0,p.patterns[next])) { p.patternIdx = next; p.activePattern = p.patterns[next]; beep(500, 0.05); }
+        };
+        document.getElementById('m-drop').onclick = () => bamDrop();
+
+        initBoard();
+        drawBoard();
+    </script>
+</body>
+</html>
