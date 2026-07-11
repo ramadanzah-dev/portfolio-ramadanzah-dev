@@ -1,447 +1,762 @@
 <!doctype html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Terminal Portfolio | Ramadanzah</title>
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap");
+    <title>Ramadanzah | Web & IoT Developer</title>
 
-      :root {
-        --bg-color: #0d1117;
-        --text-color: #c9d1d9;
-        --prompt-user: #7ee787;
-        --prompt-path: #58a6ff;
-        --highlight: #f2cc60;
-        --error: #f85149;
-        --link: #79c0ff;
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+      // Skrip untuk mengecek tema (Dark/Light) sebelum halaman dimuat penuh agar tidak berkedip (FOUC)
+      if (
+        localStorage.theme === "dark" ||
+        (!("theme" in localStorage) &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
       }
 
-      * {
-        box-sizing: border-box;
-      }
+      tailwind.config = {
+        darkMode: "class", // Mengaktifkan mode gelap berbasis class
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              zinc: {
+                850: "#202022",
+                950: "#09090b",
+              },
+              accent: {
+                DEFAULT: "#10b981", // Emerald 500
+                light: "#34d399", // Emerald 400
+                dark: "#059669", // Emerald 600
+              },
+            },
+            animation: {
+              blob: "blob 7s infinite",
+              float: "float 6s ease-in-out infinite",
+            },
+            keyframes: {
+              blob: {
+                "0%": { transform: "translate(0px, 0px) scale(1)" },
+                "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+                "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+                "100%": { transform: "translate(0px, 0px) scale(1)" },
+              },
+              float: {
+                "0%, 100%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-15px)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
 
-      body,
-      html {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        font-family: "JetBrains Mono", monospace;
-        font-size: 15px;
-        line-height: 1.5;
-        overflow: hidden;
+    <style type="text/tailwindcss">
+      body {
+        font-family: "Inter", sans-serif;
       }
-
-      #terminal-container {
-        width: 100%;
-        height: 100%;
-        padding: 20px;
-        overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: #30363d var(--bg-color);
-      }
-
-      #terminal-container::-webkit-scrollbar {
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
         width: 8px;
       }
-      #terminal-container::-webkit-scrollbar-track {
-        background: var(--bg-color);
+      ::-webkit-scrollbar-track {
+        @apply bg-zinc-100 dark:bg-zinc-950;
       }
-      #terminal-container::-webkit-scrollbar-thumb {
-        background-color: #30363d;
-        border-radius: 4px;
+      ::-webkit-scrollbar-thumb {
+        @apply bg-zinc-300 dark:bg-zinc-800 rounded-md;
       }
-
-      .output-line {
-        margin-bottom: 4px;
-        word-wrap: break-word;
-        white-space: pre-wrap;
+      ::-webkit-scrollbar-thumb:hover {
+        @apply bg-zinc-400 dark:bg-zinc-700;
       }
 
-      .prompt-span {
-        color: var(--prompt-user);
-        font-weight: bold;
+      .glass-nav {
+        @apply bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md border-b border-zinc-200 dark:border-white/5;
       }
 
-      .path-span {
-        color: var(--prompt-path);
-        font-weight: bold;
+      .glass-card {
+        @apply bg-white/50 dark:bg-zinc-800/30 backdrop-blur-md border border-zinc-200 dark:border-white/5 transition-all duration-300 shadow-sm dark:shadow-none;
       }
 
-      .symbol-span {
-        color: var(--text-color);
-      }
-
-      /* Perbaikan: Mengubah ke baseline agar input sejajar dengan teks path walau diauto-format */
-      .command-input-container {
-        display: flex;
-        align-items: baseline;
-        margin-top: 4px;
-      }
-
-      /* Perbaikan: Menggunakan nowrap mencegah masalah enter di auto-format HTML */
-      .prompt-container {
-        white-space: nowrap;
-        margin-right: 8px;
-      }
-
-      #command {
-        background: transparent;
-        border: none;
-        color: var(--text-color);
-        font-family: "JetBrains Mono", monospace;
-        font-size: 15px;
-        flex-grow: 1;
-        outline: none;
-        padding: 0;
-        margin: 0;
-        line-height: 1.5;
-      }
-
-      .color-highlight {
-        color: var(--highlight);
-      }
-      .color-error {
-        color: var(--error);
-      }
-      .color-success {
-        color: var(--prompt-user);
-      }
-      .color-path {
-        color: var(--prompt-path);
-      }
-
-      a {
-        color: var(--link);
-        text-decoration: none;
-      }
-
-      a:hover {
-        text-decoration: underline;
-      }
-
-      /* ASCII Art Styling */
-      .ascii-art {
-        color: var(--prompt-path);
-        white-space: pre;
-        font-weight: bold;
-        margin-bottom: 20px;
-        font-size: 12px;
-        line-height: 1.2;
-      }
-
-      /* Neofetch Styling */
-      .neofetch-container {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-        margin: 15px 0;
-      }
-
-      .neofetch-ascii {
-        white-space: pre;
-        font-weight: bold;
-        line-height: 1.2;
-      }
-
-      .neofetch-info {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .neofetch-colors {
-        display: flex;
-        margin-top: 8px;
-      }
-
-      .color-block {
-        width: 16px;
-        height: 16px;
-        display: inline-block;
-      }
-
-      .bg-black {
-        background-color: #30363d;
-      }
-      .bg-red {
-        background-color: #f85149;
-      }
-      .bg-green {
-        background-color: #7ee787;
-      }
-      .bg-yellow {
-        background-color: #f2cc60;
-      }
-      .bg-blue {
-        background-color: #58a6ff;
-      }
-      .bg-magenta {
-        background-color: #bc8cff;
-      }
-      .bg-cyan {
-        background-color: #79c0ff;
-      }
-      .bg-white {
-        background-color: #c9d1d9;
-      }
-
-      .neofetch-avatar-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-width: 120px;
-      }
-
-      @media (max-width: 600px) {
-        body,
-        html,
-        #command {
-          font-size: 13px;
-        }
-        .ascii-art {
-          font-size: 8px;
-        }
-        .neofetch-container {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 10px;
-        }
+      .glass-card:hover {
+        @apply border-accent/50 dark:border-accent/30 -translate-y-1 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.1)];
       }
     </style>
   </head>
-  <body>
-    <div id="terminal-container">
-      <div id="output"></div>
-      <div class="command-input-container" id="input-container">
-        <div class="prompt-container">
-          <span class="prompt-span">guest@portfolio</span>:<span
-            class="path-span"
-            id="prompt-path"
-            >~</span
-          ><span class="symbol-span">$</span>
+  <body
+    class="antialiased selection:bg-accent/30 selection:text-accent-dark dark:selection:text-accent-light relative bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300"
+  >
+    <!-- Background Decoration -->
+    <div
+      class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none transition-opacity duration-300"
+    >
+      <div
+        class="absolute top-0 left-1/4 w-96 h-96 bg-accent/20 dark:bg-accent/20 rounded-full mix-blend-multiply filter blur-[128px] opacity-70 dark:opacity-50 animate-blob"
+      ></div>
+      <div
+        class="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/20 dark:bg-blue-500/20 rounded-full mix-blend-multiply filter blur-[128px] opacity-70 dark:opacity-50 animate-blob animation-delay-2000"
+      ></div>
+      <div
+        class="absolute -bottom-32 left-1/2 w-96 h-96 bg-purple-500/20 dark:bg-purple-500/20 rounded-full mix-blend-multiply filter blur-[128px] opacity-70 dark:opacity-50 animate-blob animation-delay-4000"
+      ></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
+      <div class="max-w-6xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+          <!-- Logo -->
+          <a
+            href="#"
+            class="text-xl font-bold tracking-tighter flex items-center gap-2 group text-zinc-900 dark:text-white"
+          >
+            <span
+              class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 group-hover:border-accent dark:group-hover:border-accent transition-colors"
+            >
+              <i class="ph ph-terminal text-accent text-base"></i>
+            </span>
+            <span>Ramadanzah<span class="text-accent">.</span></span>
+          </a>
+
+          <!-- Desktop Menu -->
+          <div class="hidden md:flex items-center space-x-6">
+            <a
+              href="#about"
+              class="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >Tentang</a
+            >
+            <a
+              href="#skills"
+              class="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >Keahlian</a
+            >
+            <a
+              href="#projects"
+              class="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >Proyek</a
+            >
+
+            <!-- Theme Toggle Button (Desktop) -->
+            <button
+              id="theme-toggle"
+              class="p-2 text-zinc-500 dark:text-zinc-400 hover:text-accent dark:hover:text-accent transition-colors focus:outline-none"
+              aria-label="Toggle Dark Mode"
+            >
+              <i class="ph-fill ph-sun text-xl hidden dark:block"></i>
+              <i class="ph-fill ph-moon text-xl block dark:hidden"></i>
+            </button>
+
+            <a
+              href="#contact"
+              class="px-5 py-2.5 text-sm font-medium bg-zinc-900 dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full transition-colors"
+              >Hubungi Saya</a
+            >
+          </div>
+
+          <!-- Mobile Menu & Theme Toggle -->
+          <div class="md:hidden flex items-center gap-4">
+            <button
+              id="mobile-theme-toggle"
+              class="text-zinc-500 dark:text-zinc-400 hover:text-accent focus:outline-none"
+            >
+              <i class="ph-fill ph-sun text-2xl hidden dark:block"></i>
+              <i class="ph-fill ph-moon text-2xl block dark:hidden"></i>
+            </button>
+            <button
+              id="mobile-menu-btn"
+              class="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white focus:outline-none"
+            >
+              <i class="ph ph-list text-2xl"></i>
+            </button>
+          </div>
         </div>
-        <input
-          type="text"
-          id="command"
-          autocomplete="off"
-          spellcheck="false"
-          autofocus
-        />
       </div>
-    </div>
 
-    <script>
-      const outputElement = document.getElementById("output");
-      const inputElement = document.getElementById("command");
-      const terminalContainer = document.getElementById("terminal-container");
-      const promptPathElement = document.getElementById("prompt-path");
-
-      // Fokuskan input saat area terminal diklik
-      terminalContainer.addEventListener("click", () => {
-        inputElement.focus();
-      });
-
-      const bootMessage = `Memulai sistem...
-Memuat modul portfolio... [OK]
-Membangun koneksi... [OK]
-
-Ketik <span class="color-highlight">'help'</span> untuk melihat daftar perintah yang tersedia.
-`;
-
-      const portfolioData = {
-        about: `Halo! Saya <span class="color-highlight">Ramadanzah</span>.
-Seorang <span class="color-success">Full-stack Software Engineer</span> yang bersemangat dalam membangun aplikasi web yang skalabel dan efisien. 
-Saya memiliki pengalaman dalam menggunakan teknologi seperti JavaScript, Python, dan PHP.
-Saat saya tidak sedang coding, saya biasanya membaca atau bermain game.`,
-
-        skills: `================ KEAHLIAN TEKNIS ================
-<span class="color-path">Bahasa Pemrograman:</span> JavaScript, Python, PHP, HTML/CSS
-<span class="color-path">Frameworks & Libs:</span> React.js, Node.js, TailwindCSS, Laravel
-<span class="color-path">Database:</span>          MySQL, PostgreSQL, SQLite
-<span class="color-path">Tools & DevOps:</span>    Git, Docker
-=================================================`,
-
-        projects: `==================== PROYEK =====================
-<span class="color-highlight">1. Terminal Portfolio</span>
-   - Portofolio interaktif berbasis CLI menggunakan Vanilla JS.
-   - Menggunakan font JetBrains Mono untuk estetika terminal asli.
-   - [Tautan]: <a href="https://github.com/ramadanzah/terminal-portofolio" target="_blank">github.com/ramadanzah/terminal-portofolio</a>
-
-<span class="color-highlight">2. Sistem Inventori Web</span>
-   - Dibangun dengan React dan Node.js.
-   - Mengelola stok barang secara real-time.
-=================================================`,
-
-        contact: `==================== KONTAK =====================
-Email:    <a href="mailto:ramadanzah205@gmail.com">ramadanzah205@gmail.com</a>
-GitHub:   <a href="https://github.com/ramadanzah-dev" target="_blank">github.com/ramadanzah-dev</a>
-LinkedIn: <a href="https://linkedin.com" target="_blank">linkedin.com/in/ramadanzah</a>
-=================================================`,
-      };
-
-      const commands = {
-        help: `Perintah yang tersedia:
-  <span class="color-highlight">about</span>        - Menampilkan profil singkat saya
-  <span class="color-highlight">skills</span>       - Menampilkan daftar keahlian teknis
-  <span class="color-highlight">projects</span>     - Menampilkan daftar proyek utama
-  <span class="color-highlight">contact</span>      - Menampilkan informasi kontak dan sosial media
-  <span class="color-highlight">neofetch</span>     - Menampilkan informasi biodata ringkas
-  <span class="color-highlight">cd</span>           - Pindah direktori (contoh: cd .., cd about)
-  <span class="color-highlight">pwd</span>          - Menampilkan path / direktori saat ini
-  <span class="color-highlight">ls</span>           - Menampilkan daftar direktori
-  <span class="color-highlight">clear</span>        - Membersihkan layar terminal
-  <span class="color-highlight">whoami</span>       - Menampilkan user saat ini`,
-
-        about: portfolioData.about,
-        skills: portfolioData.skills,
-        projects: portfolioData.projects,
-        contact: portfolioData.contact,
-        whoami: `guest`,
-      };
-
-      let currentPath = "~";
-      const validDirs = ["about", "skills", "projects", "contact"];
-
-      function updatePrompt() {
-        promptPathElement.innerText = currentPath;
-      }
-
-      function getNeofetch() {
-        const avatarContent = `
-    <div class="neofetch-ascii">
- ▄       ▄
-▄ ▀▄   ▄▀ ▄
-█▄█▀███▀█▄█
-▀█████████▀
- ▄▀     ▀▄ 
-    </div>`;
-
-        return `
-<div class="neofetch-container">
-    <div class="neofetch-avatar-container">
-        ${avatarContent}
-    </div>
-    <div class="neofetch-info">
-        <div><span class="prompt-span">ramadanzah</span>@<span class="prompt-span">portfolio</span></div>
-        <div>---------------------</div>
-        <div><span class="color-path">Name</span>: Ramadanzah</div>
-        <div><span class="color-path">Role</span>: Software Engineer</div>
-        <div><span class="color-path">Location</span>: Bandar Lampung, Indonesia</div>
-        <div><span class="color-path">Experience</span>: 3+ Years</div>
-        <div><span class="color-path">Languages</span>: JavaScript, Python, PHP, Laravel</div>
-        <div><span class="color-path">Hobbies</span>: Coding, Reading, Gaming, IoT</div>
-        <div><span class="color-path">Status</span>: Open for Opportunities</div>
-        <div><span class="color-path">Email</span>: ramadanzah205@gmail.com</div>
-        <div class="neofetch-colors">
-            <div class="color-block bg-black"></div>
-            <div class="color-block bg-red"></div>
-            <div class="color-block bg-green"></div>
-            <div class="color-block bg-yellow"></div>
-            <div class="color-block bg-blue"></div>
-            <div class="color-block bg-magenta"></div>
-            <div class="color-block bg-cyan"></div>
-            <div class="color-block bg-white"></div>
+      <!-- Mobile Menu Panel -->
+      <div
+        id="mobile-menu"
+        class="hidden md:hidden bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 absolute w-full transition-colors"
+      >
+        <div class="px-6 py-4 space-y-4 flex flex-col">
+          <a
+            href="#about"
+            class="text-base font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white mobile-link"
+            >Tentang</a
+          >
+          <a
+            href="#skills"
+            class="text-base font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white mobile-link"
+            >Keahlian</a
+          >
+          <a
+            href="#projects"
+            class="text-base font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white mobile-link"
+            >Proyek</a
+          >
+          <a
+            href="#contact"
+            class="text-base font-medium text-accent hover:text-accent-light mobile-link"
+            >Hubungi Saya</a
+          >
         </div>
-    </div>
-</div>`;
-      }
+      </div>
+    </nav>
 
-      function printHTML(html) {
-        const div = document.createElement("div");
-        div.className = "output-line";
-        div.innerHTML = html;
-        outputElement.appendChild(div);
-        scrollToBottom();
-      }
+    <!-- Hero Section -->
+    <section
+      id="home"
+      class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden"
+    >
+      <div class="max-w-6xl mx-auto px-6 lg:px-8 relative z-10">
+        <div
+          class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center"
+        >
+          <!-- Text Content -->
+          <div class="max-w-3xl lg:max-w-none">
+            <div
+              class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-6"
+            >
+              <span class="relative flex h-2 w-2">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex rounded-full h-2 w-2 bg-accent"
+                ></span>
+              </span>
+              Tersedia untuk proyek baru
+            </div>
+            <h1
+              class="text-5xl lg:text-7xl font-bold tracking-tight mb-6 text-zinc-900 dark:text-white leading-tight transition-colors"
+            >
+              Membangun jembatan antara dunia
+              <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-blue-500"
+                >Digital</span
+              >
+              &
+              <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500"
+                >Fisik</span
+              >.
+            </h1>
+            <p
+              class="text-lg text-zinc-600 dark:text-zinc-400 mb-10 max-w-2xl leading-relaxed transition-colors"
+            >
+              Halo, saya Ramadanzah. Seorang Web Developer dan penggiat Internet
+              of Things (IoT). Saya merancang antarmuka web yang bersih dan
+              menghubungkannya dengan perangkat keras cerdas untuk menciptakan
+              solusi inovatif.
+            </p>
+            <div class="flex flex-wrap items-center gap-4">
+              <a
+                href="#projects"
+                class="px-6 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black font-medium rounded-full hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors flex items-center gap-2"
+              >
+                Lihat Karya Saya
+                <i class="ph ph-arrow-right text-lg"></i>
+              </a>
+              <a
+                href="https://github.com/ramadanzah-dev"
+                target="_blank"
+                class="px-6 py-3 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white font-medium rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center gap-2"
+              >
+                <i class="ph-fill ph-github-logo text-xl"></i>
+                GitHub
+              </a>
+            </div>
+          </div>
 
-      function printCommandEcho(cmd) {
-        const promptHTML = `<span class="prompt-span">guest@portfolio</span>:<span class="path-span">${currentPath}</span><span class="symbol-span">$</span> ${cmd}`;
-        printHTML(promptHTML);
-      }
+          <!-- Visual/Image Content (2.5D Effect) -->
+          <div
+            class="relative mx-auto lg:ml-auto lg:mr-0 w-full max-w-[380px] mt-10 lg:mt-0"
+          >
+            <!-- Container with floating animation -->
+            <div class="relative animate-float">
+              <!-- Background Glow effect -->
+              <div
+                class="absolute -inset-2 bg-gradient-to-r from-accent to-blue-500 rounded-[2.5rem] blur-xl opacity-30 dark:opacity-20 transition-opacity"
+              ></div>
 
-      function scrollToBottom() {
-        terminalContainer.scrollTop = terminalContainer.scrollHeight;
-      }
+              <!-- Main Image Frame -->
+              <div
+                class="relative bg-white/60 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700/50 rounded-[2.5rem] p-2 backdrop-blur-xl transition-colors"
+              >
+                <img
+                  src="ramadanzah.png"
+                  alt="Foto Ramadanzah"
+                  class="w-full h-auto rounded-3xl object-cover shadow-2xl grayscale hover:grayscale-0 transition-all duration-700 cursor-pointer"
+                  style="aspect-ratio: 4/5"
+                />
+              </div>
 
-      function initTerminal() {
-        printHTML(getNeofetch());
-        printHTML(bootMessage);
-      }
+              <!-- Floating Badges for Depth (2.5D Illusion) -->
+              <div
+                class="absolute -bottom-6 -left-8 glass-card p-4 rounded-2xl flex items-center gap-3 animate-[float_4s_ease-in-out_infinite_reverse] shadow-2xl z-20"
+              >
+                <div
+                  class="bg-accent/10 p-2.5 rounded-xl border border-accent/20"
+                >
+                  <i class="ph-fill ph-code text-accent text-2xl"></i>
+                </div>
+                <div>
+                  <p
+                    class="text-xs text-zinc-500 dark:text-zinc-400 font-medium"
+                  >
+                    Developer
+                  </p>
+                  <p class="text-sm font-bold text-zinc-900 dark:text-white">
+                    Web Apps
+                  </p>
+                </div>
+              </div>
 
-      inputElement.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-          const cmd = this.value.trim();
-          this.value = "";
+              <div
+                class="absolute -top-6 -right-6 glass-card p-4 rounded-2xl flex items-center gap-3 animate-[float_5s_ease-in-out_infinite] shadow-2xl z-20 delay-150"
+              >
+                <div
+                  class="bg-blue-500/10 p-2.5 rounded-xl border border-blue-500/20"
+                >
+                  <i class="ph-fill ph-cpu text-blue-500 text-2xl"></i>
+                </div>
+                <div>
+                  <p
+                    class="text-xs text-zinc-500 dark:text-zinc-400 font-medium"
+                  >
+                    Engineer
+                  </p>
+                  <p class="text-sm font-bold text-zinc-900 dark:text-white">
+                    IoT Systems
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-          if (cmd !== "") {
-            printCommandEcho(cmd);
-            processCommand(cmd);
-          } else {
-            printCommandEcho("");
-          }
-        }
+    <!-- About & Skills Section -->
+    <section
+      id="about"
+      class="py-20 bg-white dark:bg-zinc-900/50 border-y border-zinc-200 dark:border-white/5 transition-colors"
+    >
+      <div class="max-w-6xl mx-auto px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <!-- About Text -->
+          <div>
+            <h2
+              class="text-sm font-bold tracking-widest text-accent uppercase mb-3"
+            >
+              Tentang Saya
+            </h2>
+            <h3
+              class="text-3xl font-bold text-zinc-900 dark:text-white mb-6 transition-colors"
+            >
+              Menggabungkan Kode dengan Perangkat Keras.
+            </h3>
+            <div
+              class="space-y-4 text-zinc-600 dark:text-zinc-400 leading-relaxed transition-colors"
+            >
+              <p>
+                Ketertarikan saya pada teknologi dimulai dari rasa penasaran
+                bagaimana cara kerja sebuah website, hingga berkembang menjadi
+                keinginan untuk mengontrol benda-benda fisik melalui internet.
+              </p>
+              <p>
+                Sebagai penggiat IoT dan Web Developer, saya fokus menciptakan
+                arsitektur yang efisien. Dari merancang
+                <i>dashboard</i> analitik interaktif menggunakan React atau
+                Tailwind, hingga memprogram mikrokontroler seperti ESP32 untuk
+                mengirim data sensor secara <i>real-time</i>.
+              </p>
+              <p>
+                Saya percaya bahwa desain yang baik bukan hanya tentang
+                bagaimana sesuatu terlihat, tetapi juga bagaimana sesuatu itu
+                berfungsi tanpa hambatan bagi penggunanya.
+              </p>
+            </div>
+          </div>
+
+          <!-- Skills -->
+          <div id="skills" class="space-y-8 lg:pt-12">
+            <div>
+              <h4
+                class="text-zinc-900 dark:text-white font-semibold flex items-center gap-2 mb-4 transition-colors"
+              >
+                <i class="ph ph-monitor text-accent text-xl"></i>
+                Web Development
+              </h4>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >HTML & CSS</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >JavaScript</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >Laravel</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >Tailwind CSS</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >Node.js</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >API Integration</span
+                >
+              </div>
+            </div>
+
+            <div>
+              <h4
+                class="text-zinc-900 dark:text-white font-semibold flex items-center gap-2 mb-4 transition-colors"
+              >
+                <i class="ph ph-cpu text-accent text-xl"></i>
+                Internet of Things (IoT)
+              </h4>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >Arduino</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >ESP8266 / ESP32</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >HTTP Post</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >MQTT Protocol</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >C++</span
+                >
+                <span
+                  class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-lg text-sm text-zinc-700 dark:text-zinc-300 transition-colors"
+                  >Sensor Integrations</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-24 transition-colors">
+      <div class="max-w-6xl mx-auto px-6 lg:px-8">
+        <div
+          class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
+        >
+          <div>
+            <h2
+              class="text-sm font-bold tracking-widest text-accent uppercase mb-3"
+            >
+              Portofolio
+            </h2>
+            <h3
+              class="text-3xl font-bold text-zinc-900 dark:text-white transition-colors"
+            >
+              Proyek Pilihan.
+            </h3>
+          </div>
+          <p
+            class="text-zinc-600 dark:text-zinc-400 max-w-md transition-colors"
+          >
+            Beberapa eksperimen dan proyek nyata yang menggabungkan antarmuka
+            web modern dengan sistem cerdas di belakang layar.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Project 1 -->
+          <a
+            href="https://neliti-sk.darmajaya.ac.id"
+            target="_blank"
+            class="block glass-card rounded-2xl overflow-hidden group cursor-pointer flex flex-col"
+          >
+            <div
+              class="w-full h-52 bg-zinc-100 dark:bg-zinc-800/50 overflow-hidden relative shrink-0 border-b border-zinc-200 dark:border-zinc-700/50"
+            >
+              <img
+                src="neliti-sk.png"
+                alt="Internet of Things sebagai media kontrol dan monitoring Green House"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              />
+              <div
+                class="absolute inset-0 bg-white/10 dark:bg-zinc-950/40 group-hover:bg-transparent transition-colors duration-500"
+              ></div>
+            </div>
+            <div class="p-6 flex flex-col flex-grow">
+              <div class="flex items-center gap-2 mb-3">
+                <span
+                  class="text-xs font-semibold bg-accent/10 text-accent px-2 py-1 rounded"
+                  >IoT</span
+                >
+                <span
+                  class="text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-1 rounded"
+                  >Web Dashboard</span
+                >
+                <span
+                  class="text-xs font-semibold bg-red-500/10 text-red-600 dark:text-red-400 px-2 py-1 rounded"
+                  >Apps</span
+                >
+              </div>
+              <h4
+                class="text-xl font-bold text-zinc-900 dark:text-white mb-2 group-hover:text-accent transition-colors"
+              >
+                Internet of Things sebagai media kontrol dan monitoring Green
+                House
+              </h4>
+              <p
+                class="text-sm text-zinc-600 dark:text-zinc-400 mb-6 line-clamp-2 transition-colors"
+              >
+                Sistem pemantauan suhu dan kelembaban rumah kaca secara
+                real-time menggunakan ESP32, sensor DHT22, dan platform web
+                untuk menampilkan data secara interaktif.
+              </p>
+              <div
+                class="mt-auto flex items-center text-sm font-medium text-zinc-900 dark:text-white group-hover:text-accent transition-colors"
+              >
+                Lihat Proyek <i class="ph ph-arrow-up-right ml-1"></i>
+              </div>
+            </div>
+          </a>
+
+          <!-- Project 2 -->
+          <a
+            href="https://pti.darmajaya.ac.id"
+            target="_blank"
+            class="block glass-card rounded-2xl overflow-hidden group cursor-pointer flex flex-col"
+          >
+            <div
+              class="w-full h-52 bg-zinc-100 dark:bg-zinc-800/50 overflow-hidden relative shrink-0 border-b border-zinc-200 dark:border-zinc-700/50"
+            >
+              <img
+                src="pti.png"
+                alt="Website Program Studi Pendidikan Teknologi Informasi"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              />
+              <div
+                class="absolute inset-0 bg-white/10 dark:bg-zinc-950/40 group-hover:bg-transparent transition-colors duration-500"
+              ></div>
+            </div>
+            <div class="p-6 flex flex-col flex-grow">
+              <div class="flex items-center gap-2 mb-3">
+                <span
+                  class="text-xs font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2 py-1 rounded"
+                  >Web
+                </span>
+                <span
+                  class="text-xs font-semibold bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 px-2 py-1 rounded transition-colors"
+                  >Laravel</span
+                >
+              </div>
+              <h4
+                class="text-xl font-bold text-zinc-900 dark:text-white mb-2 group-hover:text-accent transition-colors"
+              >
+                Membangun Website Program Studi Pendidikan Teknologi Informasi
+              </h4>
+              <p
+                class="text-sm text-zinc-600 dark:text-zinc-400 mb-6 line-clamp-2 transition-colors"
+              >
+                Website resmi untuk Program Studi Pendidikan Teknologi Informasi
+                Institut Informatika dan Bisnis Darmajaya. Dibangun menggunakan
+                Laravel, untuk pengalaman pengguna yang interaktif.
+              </p>
+              <div
+                class="mt-auto flex items-center text-sm font-medium text-zinc-900 dark:text-white group-hover:text-accent transition-colors"
+              >
+                Lihat Proyek <i class="ph ph-arrow-up-right ml-1"></i>
+              </div>
+            </div>
+          </a>
+
+          <!-- Project 3 -->
+          <a
+            href="https://lpm.darmajaya.ac.id"
+            target="_blank"
+            class="block glass-card rounded-2xl overflow-hidden group cursor-pointer flex flex-col"
+          >
+            <div
+              class="w-full h-52 bg-zinc-100 dark:bg-zinc-800/50 overflow-hidden relative shrink-0 border-b border-zinc-200 dark:border-zinc-700/50"
+            >
+              <img
+                src="lpm.png"
+                alt="Website yang berfokus menampilkan informasi dan layanan Lembaga Penjaminan Mutu (LPM) Darmajaya"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              />
+              <div
+                class="absolute inset-0 bg-white/10 dark:bg-zinc-950/40 group-hover:bg-transparent transition-colors duration-500"
+              ></div>
+            </div>
+            <div class="p-6 flex flex-col flex-grow">
+              <div class="flex items-center gap-2 mb-3">
+                <span
+                  class="text-xs font-semibold bg-accent/10 text-accent px-2 py-1 rounded"
+                  >Web</span
+                >
+                <span
+                  class="text-xs font-semibold bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 px-2 py-1 rounded transition-colors"
+                  >Laravel</span
+                >
+              </div>
+              <h4
+                class="text-xl font-bold text-zinc-900 dark:text-white mb-2 group-hover:text-accent transition-colors"
+              >
+                Membangun Website Lembaga Penjaminan Mutu (LPM) Darmajaya
+              </h4>
+              <p
+                class="text-sm text-zinc-600 dark:text-zinc-400 mb-6 line-clamp-2 transition-colors"
+              >
+                Website yang berfokus menampilkan informasi dan layanan Lembaga
+                Penjaminan Mutu (LPM) Darmajaya. Dibangun menggunakan Laravel
+                untuk memberikan pengalaman pengguna yang interaktif dan
+                responsif.
+              </p>
+              <div
+                class="mt-auto flex items-center text-sm font-medium text-zinc-900 dark:text-white group-hover:text-accent transition-colors"
+              >
+                Lihat Proyek <i class="ph ph-arrow-up-right ml-1"></i>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section
+      id="contact"
+      class="py-24 bg-white dark:bg-zinc-900/30 border-t border-zinc-200 dark:border-white/5 transition-colors"
+    >
+      <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 text-accent mb-8"
+        >
+          <i class="ph ph-envelope-simple text-3xl"></i>
+        </div>
+        <h2
+          class="text-4xl font-bold text-zinc-900 dark:text-white mb-6 transition-colors"
+        >
+          Mari Ciptakan Sesuatu Bersama.
+        </h2>
+        <p
+          class="text-lg text-zinc-600 dark:text-zinc-400 mb-10 transition-colors"
+        >
+          Tertarik untuk berkolaborasi, memiliki proyek IoT/Web yang ingin
+          diwujudkan, atau sekadar ingin menyapa? Kotak masuk saya selalu
+          terbuka.
+        </p>
+        <a
+          href="mailto:halo@ramadanzah.com"
+          class="inline-flex items-center gap-2 px-8 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black font-semibold rounded-full hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95"
+        >
+          Kirim Pesan
+          <i class="ph ph-paper-plane-right text-lg"></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer
+      class="py-8 border-t border-zinc-200 dark:border-white/5 text-center bg-zinc-50 dark:bg-zinc-950 transition-colors"
+    >
+      <div
+        class="max-w-6xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4"
+      >
+        <p class="text-sm text-zinc-500 transition-colors">
+          &copy; 2024 Ramadanzah. Dibuat dengan kode & kopi.
+        </p>
+        <div class="flex items-center space-x-6">
+          <a
+            href="#"
+            class="text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-white transition-colors"
+          >
+            <i class="ph-fill ph-github-logo text-2xl"></i>
+          </a>
+          <a
+            href="#"
+            class="text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-white transition-colors"
+          >
+            <i class="ph-fill ph-linkedin-logo text-2xl"></i>
+          </a>
+          <a
+            href="#"
+            class="text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-white transition-colors"
+          >
+            <i class="ph-fill ph-x-logo text-2xl"></i>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+      // Mobile Menu Toggle
+      const btn = document.getElementById("mobile-menu-btn");
+      const menu = document.getElementById("mobile-menu");
+      const mobileLinks = document.querySelectorAll(".mobile-link");
+
+      btn.addEventListener("click", () => {
+        menu.classList.toggle("hidden");
       });
 
-      function processCommand(cmdInput) {
-        const args = cmdInput.split(" ").filter(Boolean);
-        const cmd = args[0].toLowerCase();
+      mobileLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+          menu.classList.add("hidden");
+        });
+      });
 
-        if (cmd === "clear" || cmd === "cls") {
-          outputElement.innerHTML = "";
-        } else if (cmd === "cd") {
-          const target = args[1];
-          if (!target || target === "~") {
-            currentPath = "~";
-          } else if (target === "..") {
-            if (currentPath !== "~") {
-              const parts = currentPath.split("/");
-              parts.pop();
-              currentPath = parts.length > 0 ? parts.join("/") : "~";
-            }
-          } else if (validDirs.includes(target)) {
-            currentPath = `~/${target}`;
-          } else {
-            printHTML(`bash: cd: ${target}: No such file or directory`);
-          }
-          updatePrompt();
-        } else if (cmd === "pwd") {
-          let fullPath = "/home/guest";
-          if (currentPath !== "~") {
-            fullPath += currentPath.substring(1);
-          }
-          printHTML(fullPath);
-        } else if (cmd === "ls") {
-          if (currentPath === "~") {
-            printHTML(
-              `<span class="color-path">about/</span>  <span class="color-path">skills/</span>  <span class="color-path">projects/</span>  <span class="color-path">contact/</span>`,
-            );
-          } else {
-            printHTML(` `); // Jika di dalam folder, dianggap kosong
-          }
-        } else if (cmd === "neofetch" || cmd === "fastfetch") {
-          printHTML(getNeofetch());
-        } else if (validDirs.includes(cmd)) {
-          // Mengubah path secara otomatis dan menampilkan datanya
-          currentPath = `~/${cmd}`;
-          updatePrompt();
-          printHTML(commands[cmd]);
-        } else if (commands[cmd]) {
-          printHTML(commands[cmd]);
-        } else if (cmd === "exit") {
-          printHTML("Sesi diakhiri. Silakan tutup tab browser ini.");
-          document.getElementById("input-container").style.display = "none";
+      // Dark Mode Toggle Logic
+      const themeToggleBtn = document.getElementById("theme-toggle");
+      const mobileThemeToggleBtn = document.getElementById(
+        "mobile-theme-toggle",
+      );
+
+      function toggleTheme() {
+        // Jika saat ini di dark mode, ganti ke light mode
+        if (document.documentElement.classList.contains("dark")) {
+          document.documentElement.classList.remove("dark");
+          localStorage.setItem("theme", "light");
         } else {
-          printHTML(
-            `bash: ${cmd}: <span class="color-error">perintah tidak ditemukan</span>. Ketik <span class="color-highlight">'help'</span> untuk bantuan.`,
-          );
+          // Jika saat ini light mode, ganti ke dark mode
+          document.documentElement.classList.add("dark");
+          localStorage.setItem("theme", "dark");
         }
       }
 
-      // Jalankan saat load
-      window.onload = initTerminal;
+      // Jalankan fungsi saat ikon di klik (Desktop maupun Mobile)
+      themeToggleBtn.addEventListener("click", toggleTheme);
+      mobileThemeToggleBtn.addEventListener("click", toggleTheme);
     </script>
   </body>
 </html>
