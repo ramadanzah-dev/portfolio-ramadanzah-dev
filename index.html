@@ -1,389 +1,448 @@
-<!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ramadanzah-dev | Terminal Portfolio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terminal Portfolio | Ramadanzah</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap");
 
-    <link rel="shortcut icon" href="img/-_-.png" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css"?v=1.0>
-</head>
-<body class="w-full">
+      :root {
+        --bg-color: #0d1117;
+        --text-color: #c9d1d9;
+        --prompt-user: #7ee787;
+        --prompt-path: #58a6ff;
+        --highlight: #f2cc60;
+        --error: #f85149;
+        --link: #79c0ff;
+      }
 
-    <div class="crt-overlay"></div>
+      * {
+        box-sizing: border-box;
+      }
 
-        <!-- Loading Overlay -->
-    <div id="loading-screen" class="fixed inset-0 z-[999] bg-[#0d1117] flex flex-col items-center justify-center font-mono">
-        <div class="relative">
-            <!-- Spinner Lingkaran -->
-            <div class="w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
-            <!-- Ikon Tengah (Opsional) -->
-            <div class="absolute inset-0 flex items-center justify-center">
-                <span class="text-emerald-500 text-xs font-pixel">RDZ</span>
-            </div>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 15px;
+        line-height: 1.5;
+        overflow: hidden;
+      }
+
+      #terminal-container {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #30363d var(--bg-color);
+      }
+
+      #terminal-container::-webkit-scrollbar {
+        width: 8px;
+      }
+      #terminal-container::-webkit-scrollbar-track {
+        background: var(--bg-color);
+      }
+      #terminal-container::-webkit-scrollbar-thumb {
+        background-color: #30363d;
+        border-radius: 4px;
+      }
+
+      .output-line {
+        margin-bottom: 4px;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+
+      .prompt-span {
+        color: var(--prompt-user);
+        font-weight: bold;
+      }
+
+      .path-span {
+        color: var(--prompt-path);
+        font-weight: bold;
+      }
+
+      .symbol-span {
+        color: var(--text-color);
+      }
+
+      /* Perbaikan: Mengubah ke baseline agar input sejajar dengan teks path walau diauto-format */
+      .command-input-container {
+        display: flex;
+        align-items: baseline;
+        margin-top: 4px;
+      }
+
+      /* Perbaikan: Menggunakan nowrap mencegah masalah enter di auto-format HTML */
+      .prompt-container {
+        white-space: nowrap;
+        margin-right: 8px;
+      }
+
+      #command {
+        background: transparent;
+        border: none;
+        color: var(--text-color);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 15px;
+        flex-grow: 1;
+        outline: none;
+        padding: 0;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      .color-highlight {
+        color: var(--highlight);
+      }
+      .color-error {
+        color: var(--error);
+      }
+      .color-success {
+        color: var(--prompt-user);
+      }
+      .color-path {
+        color: var(--prompt-path);
+      }
+
+      a {
+        color: var(--link);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      /* ASCII Art Styling */
+      .ascii-art {
+        color: var(--prompt-path);
+        white-space: pre;
+        font-weight: bold;
+        margin-bottom: 20px;
+        font-size: 12px;
+        line-height: 1.2;
+      }
+
+      /* Neofetch Styling */
+      .neofetch-container {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin: 15px 0;
+      }
+
+      .neofetch-ascii {
+        white-space: pre;
+        font-weight: bold;
+        line-height: 1.2;
+      }
+
+      .neofetch-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .neofetch-colors {
+        display: flex;
+        margin-top: 8px;
+      }
+
+      .color-block {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+      }
+
+      .bg-black {
+        background-color: #30363d;
+      }
+      .bg-red {
+        background-color: #f85149;
+      }
+      .bg-green {
+        background-color: #7ee787;
+      }
+      .bg-yellow {
+        background-color: #f2cc60;
+      }
+      .bg-blue {
+        background-color: #58a6ff;
+      }
+      .bg-magenta {
+        background-color: #bc8cff;
+      }
+      .bg-cyan {
+        background-color: #79c0ff;
+      }
+      .bg-white {
+        background-color: #c9d1d9;
+      }
+
+      .neofetch-avatar-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 120px;
+      }
+
+      @media (max-width: 600px) {
+        body,
+        html,
+        #command {
+          font-size: 13px;
+        }
+        .ascii-art {
+          font-size: 8px;
+        }
+        .neofetch-container {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="terminal-container">
+      <div id="output"></div>
+      <div class="command-input-container" id="input-container">
+        <div class="prompt-container">
+          <span class="prompt-span">guest@portfolio</span>:<span
+            class="path-span"
+            id="prompt-path"
+            >~</span
+          ><span class="symbol-span">$</span>
         </div>
-        <div class="mt-4 text-emerald-500 tracking-widest text-sm animate-pulse">
-            INITIALIZING_SYSTEM... <span id="load-perc">0%</span>
-        </div>
+        <input
+          type="text"
+          id="command"
+          autocomplete="off"
+          spellcheck="false"
+          autofocus
+        />
+      </div>
     </div>
 
-    <!-- Floating Contact Trigger -->
-    <button class="floating-trigger" id="open-terminal">
-        ASK_PROJECT
-    </button>
+    <script>
+      const outputElement = document.getElementById("output");
+      const inputElement = document.getElementById("command");
+      const terminalContainer = document.getElementById("terminal-container");
+      const promptPathElement = document.getElementById("prompt-path");
 
-    <!-- Terminal Pop-up Window -->
-    <div id="contact-terminal">
-        <div class="terminal-header">
-            <span>PROJ_INVITATION.sh</span>
-            <button id="close-terminal" class="hover:text-red-400">X</button>
-        </div>
-        <div class="terminal-body font-mono">
-            <div id="terminal-content"></div>
-            <div id="terminal-input-line">
-                <span>$</span>
-                <input type="text" id="term-user-input" maxlength="1" autocomplete="off" autofocus>
-                <span class="cursor"></span>
-            </div>
+      // Fokuskan input saat area terminal diklik
+      terminalContainer.addEventListener("click", () => {
+        inputElement.focus();
+      });
+
+      const bootMessage = `Memulai sistem...
+Memuat modul portfolio... [OK]
+Membangun koneksi... [OK]
+
+Selamat datang di terminal portofolio interaktif.
+Ketik <span class="color-highlight">'help'</span> untuk melihat daftar perintah yang tersedia.
+`;
+
+      const portfolioData = {
+        about: `Halo! Saya <span class="color-highlight">Ramadanzah</span>.
+Seorang <span class="color-success">Full-stack Software Engineer</span> yang bersemangat dalam membangun aplikasi web yang skalabel dan efisien. 
+Saya memiliki pengalaman dalam menggunakan teknologi seperti JavaScript, Python, dan PHP.
+Saat saya tidak sedang coding, saya biasanya membaca atau bermain game.`,
+
+        skills: `================ KEAHLIAN TEKNIS ================
+<span class="color-path">Bahasa Pemrograman:</span> JavaScript, Python, PHP, HTML/CSS
+<span class="color-path">Frameworks & Libs:</span> React.js, Node.js, TailwindCSS
+<span class="color-path">Database:</span>          MySQL, PostgreSQL
+<span class="color-path">Tools & DevOps:</span>    Git, Docker
+=================================================`,
+
+        projects: `==================== PROYEK =====================
+<span class="color-highlight">1. Terminal Portfolio</span>
+   - Portofolio interaktif berbasis CLI menggunakan Vanilla JS.
+   - Menggunakan font JetBrains Mono untuk estetika terminal asli.
+   - [Tautan]: <a href="#" target="_blank">github.com/ramadanzah/terminal-portofolio</a>
+
+<span class="color-highlight">2. Sistem Inventori Web</span>
+   - Dibangun dengan React dan Node.js.
+   - Mengelola stok barang secara real-time.
+=================================================`,
+
+        contact: `==================== KONTAK =====================
+Email:    <a href="mailto:hello@ramadanzah.dev">hello@ramadanzah.dev</a>
+GitHub:   <a href="https://github.com" target="_blank">github.com/ramadanzah</a>
+LinkedIn: <a href="https://linkedin.com" target="_blank">linkedin.com/in/ramadanzah</a>
+=================================================`,
+      };
+
+      const commands = {
+        help: `Perintah yang tersedia:
+  <span class="color-highlight">about</span>        - Menampilkan profil singkat saya
+  <span class="color-highlight">skills</span>       - Menampilkan daftar keahlian teknis
+  <span class="color-highlight">projects</span>     - Menampilkan daftar proyek utama
+  <span class="color-highlight">contact</span>      - Menampilkan informasi kontak dan sosial media
+  <span class="color-highlight">neofetch</span>     - Menampilkan informasi biodata ringkas
+  <span class="color-highlight">cd</span>           - Pindah direktori (contoh: cd .., cd about)
+  <span class="color-highlight">pwd</span>          - Menampilkan path / direktori saat ini
+  <span class="color-highlight">ls</span>           - Menampilkan daftar direktori
+  <span class="color-highlight">clear</span>        - Membersihkan layar terminal
+  <span class="color-highlight">whoami</span>       - Menampilkan user saat ini`,
+
+        about: portfolioData.about,
+        skills: portfolioData.skills,
+        projects: portfolioData.projects,
+        contact: portfolioData.contact,
+        whoami: `guest`,
+      };
+
+      let currentPath = "~";
+      const validDirs = ["about", "skills", "projects", "contact"];
+
+      function updatePrompt() {
+        promptPathElement.innerText = currentPath;
+      }
+
+      function getNeofetch() {
+        const avatarContent = `
+    <div class="neofetch-ascii">
+ ▄       ▄
+▄ ▀▄   ▄▀ ▄
+█▄█▀███▀█▄█
+▀█████████▀
+ ▄▀     ▀▄ 
+    </div>`;
+
+        return `
+<div class="neofetch-container">
+    <div class="neofetch-avatar-container">
+        ${avatarContent}
+    </div>
+    <div class="neofetch-info">
+        <div><span class="prompt-span">ramadanzah</span>@<span class="prompt-span">portfolio</span></div>
+        <div>---------------------</div>
+        <div><span class="color-path">Name</span>: Ramadanzah</div>
+        <div><span class="color-path">Role</span>: Software Engineer</div>
+        <div><span class="color-path">Location</span>: Bandar Lampung, Indonesia</div>
+        <div><span class="color-path">Experience</span>: 3+ Years</div>
+        <div><span class="color-path">Languages</span>: JavaScript, Python, PHP</div>
+        <div><span class="color-path">Hobbies</span>: Coding, Reading, Gaming</div>
+        <div><span class="color-path">Status</span>: Open for Opportunities</div>
+        <div><span class="color-path">Email</span>: hello@ramadanzah.dev</div>
+        <div class="neofetch-colors">
+            <div class="color-block bg-black"></div>
+            <div class="color-block bg-red"></div>
+            <div class="color-block bg-green"></div>
+            <div class="color-block bg-yellow"></div>
+            <div class="color-block bg-blue"></div>
+            <div class="color-block bg-magenta"></div>
+            <div class="color-block bg-cyan"></div>
+            <div class="color-block bg-white"></div>
         </div>
     </div>
+</div>`;
+      }
 
-    <!-- Terminal Top Nav -->
-    <nav class="fixed top-0 w-full z-[100] bg-[#0d1117]/95 border-b-2 border-[#30363d] p-4">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <!-- Brand -->
-            <div class="flex items-center gap-3">
-                <span class="text-emerald-500 font-pixel text-[10px]">~/ramadanzah-dev</span>
-                <div class="hidden sm:flex gap-1">
-                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                    <div class="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                </div>
-            </div>
+      function printHTML(html) {
+        const div = document.createElement("div");
+        div.className = "output-line";
+        div.innerHTML = html;
+        outputElement.appendChild(div);
+        scrollToBottom();
+      }
 
-            <!-- Desktop Nav -->
-            <div class="hidden md:flex gap-6 text-xl font-mono">
-                <a href="#hero" class="hover:text-emerald-400">.home()</a>
-                <a href="#about" class="hover:text-emerald-400">.about()</a>
-                <a href="#skills" class="hover:text-emerald-400">.skills()</a>
-                <a href="#projects" class="hover:text-emerald-400">.work()</a>
-                <a href="game.html" class="hover:text-emerald-400">.game()</a>
-                <a href="#contact" class="hover:text-emerald-400">.contact()</a>
-            </div>
+      function printCommandEcho(cmd) {
+        const promptHTML = `<span class="prompt-span">guest@portfolio</span>:<span class="path-span">${currentPath}</span><span class="symbol-span">$</span> ${cmd}`;
+        printHTML(promptHTML);
+      }
 
-            <!-- Mobile Burger Icon -->
-            <button id="burger-btn" class="md:hidden flex flex-col gap-1.5 p-2 focus:outline-none z-[110]">
-                <div class="burger-line line-1 w-6 h-0.5 bg-emerald-500"></div>
-                <div class="burger-line line-2 w-6 h-0.5 bg-emerald-500"></div>
-                <div class="burger-line line-3 w-6 h-0.5 bg-emerald-500"></div>
-            </button>
-        </div>
+      function scrollToBottom() {
+        terminalContainer.scrollTop = terminalContainer.scrollHeight;
+      }
 
-        <!-- Mobile Overlay Menu -->
-        <div id="mobile-menu" class="fixed inset-0 bg-[#0d1117] flex flex-col items-center justify-center gap-8 text-3xl font-mono md:hidden">
-            <a href="#hero" class="mobile-link hover:text-emerald-400">.home()</a>
-            <a href="#about" class="mobile-link hover:text-emerald-400">.about()</a>
-            <a href="#skills" class="mobile-link hover:text-emerald-400">.skills()</a>
-            <a href="#projects" class="mobile-link hover:text-emerald-400">.work()</a>
-            <a href="game.html" class="mobile-link hover:text-emerald-400">.game()</a>
-            <a href="#contact" class="mobile-link hover:text-emerald-400">.contact()</a>
-            <div class="mt-10 opacity-20 font-pixel text-[8px] uppercase">End of Navigation</div>
-        </div>
-    </nav>
+      function initTerminal() {
+        printHTML(getNeofetch());
+        printHTML(bootMessage);
+      }
 
-    <!-- Hero Section -->
-    <section id="hero" class="min-h-screen flex flex-col items-center justify-center p-4 pt-28">
-        <div class="relative mb-8 flex items-center justify-center min-h-[250px] md:min-h-[300px] w-full">
-            <pre id="ascii-canvas"></pre>
-        </div>
+      inputElement.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          const cmd = this.value.trim();
+          this.value = "";
 
-        <div class="text-center w-full max-w-4xl px-4">
-            <div class="inline-block mb-4 border border-emerald-500/30 px-3 py-1 bg-emerald-500/5">
-                <span class="text-emerald-500 font-mono text-sm md:text-base">$ whoami --status: deployed</span>
-            </div>
-            <h1 class="font-pixel text-2xl md:text-4xl mb-4 text-white uppercase tracking-tight">Ramadanzah-dev</h1>
-            <p class="text-xl md:text-3xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Full-stack developer focused on <span class="text-emerald-400">IoT Ecosystem</span>, <span class="text-blue-400">Real-time Data Monitoring</span> & <span class="text-amber-400">Web Custom Development</span>.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#about" class="pixel-border px-8 py-3 text-emerald-400 hover:bg-emerald-500/10 transition-colors text-xl uppercase tracking-tighter">SISTEM_DASHBOARD</a>
-                <a href="#projects" class="pixel-border px-8 py-3 text-slate-400 hover:bg-white/5 transition-colors text-xl uppercase tracking-tighter">DAFTAR_PROYEK</a>
-            </div>
-        </div>
-    </section>
+          if (cmd !== "") {
+            printCommandEcho(cmd);
+            processCommand(cmd);
+          } else {
+            printCommandEcho("");
+          }
+        }
+      });
 
-    <!-- About Section -->
-    <section id="about" class="py-20 px-4 max-w-6xl mx-auto">
-        <div class="flex items-center gap-3 mb-8">
-            <span class="text-emerald-500 text-2xl font-bold">></span>
-            <h2 class="font-pixel text-lg md:text-xl text-white">SYSTEM_INFO</h2>
-            <div class="h-[2px] flex-grow bg-[#30363d]"></div>
-        </div>
+      function processCommand(cmdInput) {
+        const args = cmdInput.split(" ").filter(Boolean);
+        const cmd = args[0].toLowerCase();
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-7 pixel-border p-5 md:p-8 font-mono">
-                <div class="flex items-center gap-2 mb-6 border-b border-[#30363d] pb-2">
-                    <span class="text-red-400">●</span><span class="text-amber-400">●</span><span class="text-green-400">●</span>
-                    <span class="ml-2 text-xs text-slate-500">bash — 80x24</span>
-                </div>
-                <div class="space-y-4 text-xl md:text-2xl">
-                    <p><span class="text-emerald-500">$</span> cat bio.txt</p>
-                    <p class="text-slate-300 leading-relaxed">
-                        Ramadanzah is a full-stack developer specializing in <strong>IoT ecosystems</strong> and <strong>real-time monitoring</strong>. 
-                        With 5+ years of experience bridging the gap between hardware and software, he builds scalable applications that turn complex data into actionable insights. 
-                        Passionate about creating impactful digital experiences through efficient code and intuitive design.
-                    </p>
-                    <p><span class="text-emerald-500">$</span> grep "interests" user_data</p>
-                    <ul class="list-none pl-4 text-slate-400">
-                        <li>- Embedded Systems Architecture</li>
-                        <li>- Real-time Database Management</li>
-                        <li>- Mobile UI/UX for Control Systems</li>
-                    </ul>
-                    <p><span class="text-emerald-500">$</span> location --current</p>
-                    <p class="text-blue-400 pl-4"> Indonesia archipelago, Earth <span class="cursor"></span></p>
-                </div>
-            </div>
+        if (cmd === "clear" || cmd === "cls") {
+          outputElement.innerHTML = "";
+        } else if (cmd === "cd") {
+          const target = args[1];
+          if (!target || target === "~") {
+            currentPath = "~";
+          } else if (target === "..") {
+            if (currentPath !== "~") {
+              const parts = currentPath.split("/");
+              parts.pop();
+              currentPath = parts.length > 0 ? parts.join("/") : "~";
+            }
+          } else if (validDirs.includes(target)) {
+            currentPath = `~/${target}`;
+          } else {
+            printHTML(`bash: cd: ${target}: No such file or directory`);
+          }
+          updatePrompt();
+        } else if (cmd === "pwd") {
+          let fullPath = "/home/guest";
+          if (currentPath !== "~") {
+            fullPath += currentPath.substring(1);
+          }
+          printHTML(fullPath);
+        } else if (cmd === "ls") {
+          if (currentPath === "~") {
+            printHTML(
+              `<span class="color-path">about/</span>  <span class="color-path">skills/</span>  <span class="color-path">projects/</span>  <span class="color-path">contact/</span>`,
+            );
+          } else {
+            printHTML(` `); // Jika di dalam folder, dianggap kosong
+          }
+        } else if (cmd === "neofetch" || cmd === "fastfetch") {
+          printHTML(getNeofetch());
+        } else if (validDirs.includes(cmd)) {
+          // Mengubah path secara otomatis dan menampilkan datanya
+          currentPath = `~/${cmd}`;
+          updatePrompt();
+          printHTML(commands[cmd]);
+        } else if (commands[cmd]) {
+          printHTML(commands[cmd]);
+        } else if (cmd === "exit") {
+          printHTML("Sesi diakhiri. Silakan tutup tab browser ini.");
+          document.getElementById("input-container").style.display = "none";
+        } else {
+          printHTML(
+            `bash: ${cmd}: <span class="color-error">perintah tidak ditemukan</span>. Ketik <span class="color-highlight">'help'</span> untuk bantuan.`,
+          );
+        }
+      }
 
-            <div class="lg:col-span-5 space-y-6">
-                <div class="pixel-border p-4 flex flex-col items-center">
-                    <div class="w-full h-48 bg-slate-900 border border-[#30363d] mb-4 overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-500">
-                        <img src="img/profil.png" alt="Profil Ramadanzah" class="w-full h-full object-cover opacity-80">
-                    </div>
-                    <div class="w-full text-left font-mono space-y-1">
-                        <div class="flex justify-between text-sm text-slate-500"><span>KERNEL:</span><span class="text-white">v5.10-LTS</span></div>
-                        <div class="flex justify-between text-sm text-slate-500"><span>UPTIME:</span><span class="text-white">24 Years</span></div>
-                        <div class="flex justify-between text-sm text-slate-500"><span>ARCH:</span><span class="text-white">Full-stack</span></div>
-                    </div>
-                </div>
-                
-                <div class="pixel-border p-5 bg-emerald-500/5 border-emerald-500/30">
-                    <h3 class="font-pixel text-[10px] text-emerald-500 mb-4 uppercase">FOCUS</h3>
-                    <div class="space-y-3">
-                        <div class="w-full bg-[#0d1117] h-2 border border-[#30363d] overflow-hidden">
-                            <div class="bg-emerald-500 h-full w-[60%]"></div>
-                        </div>
-                        <div class="flex justify-between text-sm uppercase"><span>HARDWARE_INT</span><span>60%</span></div>
-                        <div class="w-full bg-[#0d1117] h-2 border border-[#30363d] overflow-hidden">
-                            <div class="bg-blue-500 h-full w-[85%]"></div>
-                        </div>
-                        <div class="flex justify-between text-sm uppercase"><span>SOFTWARE_DEV</span><span>85%</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Skills Section -->
-    <section id="skills" class="py-20 px-4 max-w-6xl mx-auto">
-        <div class="flex items-center gap-3 mb-12">
-            <span class="text-emerald-500 text-2xl font-bold">></span>
-            <h2 class="font-pixel text-lg md:text-xl text-white">TECH_STACK</h2>
-            <div class="h-[2px] flex-grow bg-[#30363d]"></div>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="pixel-border p-6">
-                <h3 class="text-emerald-400 font-pixel text-[10px] mb-6 flex items-center gap-2">
-                    <span class="w-2 h-2 bg-emerald-400"></span> FRONT_END
-                </h3>
-                <div class="grid grid-cols-1 gap-2 font-mono text-xl">
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML5"><span>HTML5</span></div>
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS3"><span>CSS3</span></div>
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JS"><span>JS_ES6</span></div>
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg" alt="Tailwind"><span>TAILWIND</span></div>
-                </div>
-            </div>
-
-            <div class="pixel-border p-6">
-                <h3 class="text-blue-400 font-pixel text-[10px] mb-6 flex items-center gap-2">
-                    <span class="w-2 h-2 bg-blue-400"></span> BACK_END
-                </h3>
-                <div class="grid grid-cols-1 gap-2 font-mono text-xl">
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg" alt="Laravel"><span>PHP_LARAVEL</span></div>
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" alt="NodeJS"><span>NODE_JS</span></div>
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" alt="MySQL"><span>MYSQL</span></div>
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-original.svg" alt="Firebase"><span>FIREBASE</span></div>
-                </div>
-            </div>
-
-            <div class="pixel-border p-6">
-                <h3 class="text-amber-400 font-pixel text-[10px] mb-6 flex items-center gap-2">
-                    <span class="w-2 h-2 bg-amber-400"></span> SYSTEMS_IOT
-                </h3>
-                <div class="grid grid-cols-1 gap-2 font-mono text-xl">
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/arduino/arduino-original.svg" alt="Arduino"><span>ARDUINO</span></div>
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/raspberrypi/raspberrypi-original.svg" alt="Raspberry Pi"><span>RASPBERRY_PI</span></div>
-                    <div class="tech-tag"><img src="img/esp.png" alt="Python"><span>ESP</span></div>
-                    <div class="tech-tag"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/android/android-original.svg" alt="Android"><span>ANDROID_SDK</span></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section id="projects" class="py-20 px-4 bg-[#0d1117]/50">
-        <div class="max-w-6xl mx-auto">
-            <div class="flex items-center gap-3 mb-12">
-                <span class="text-emerald-500 text-2xl font-bold">></span>
-                <h2 class="font-pixel text-lg md:text-xl text-white uppercase">PROJECT_ARCHIVES</h2>
-                <div class="h-[2px] flex-grow bg-[#30363d]"></div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <!-- PTI Darmajaya -->
-                <div class="pixel-border group overflow-hidden">
-                    <div class="h-48 bg-slate-900 border-b-2 border-[#30363d] overflow-hidden grayscale group-hover:grayscale-0 transition-all relative">
-                        <img src="img/pti.png" alt="PTI Darmajaya" class="w-full h-full object-cover opacity-40">
-                        <a href="https://pti.darmajaya.ac.id" target="_blank" class="absolute top-4 right-4 live-link">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                        </a>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-emerald-400">PTI_DARMAJAYA</h3>
-                            <span class="text-[10px] text-slate-500">[WEB_SYS]</span>
-                        </div>
-                        <p class="text-xl text-slate-400 mb-6">The official web system for the ICT Education Department, designed to manage academic resources, student data, and departmental information streamlining.</p>
-                        <div class="flex gap-2">
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">LARAVEL</span>
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">MYSQL</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- LPM Darmajaya -->
-                <div class="pixel-border group overflow-hidden">
-                    <div class="h-48 bg-slate-900 border-b-2 border-[#30363d] overflow-hidden grayscale group-hover:grayscale-0 transition-all relative">
-                        <img src="img/lpm.png" alt="LPM Darmajaya" class="w-full h-full object-cover opacity-40">
-                        <a href="https://lpm.darmajaya.ac.id" target="_blank" class="absolute top-4 right-4 live-link">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                        </a>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-blue-400">LPM_DARMAJAYA</h3>
-                            <span class="text-[10px] text-slate-500">[QUALITY]</span>
-                        </div>
-                        <p class="text-xl text-slate-400 mb-6">Quality Assurance Agency. Audit document management system and academic quality standards.</p>
-                        <div class="flex gap-2">
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">PHP_FW</span>
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">DOC_MGMT</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Smart City Darmajaya -->
-                <div class="pixel-border group overflow-hidden">
-                    <div class="h-48 bg-slate-900 border-b-2 border-[#30363d] overflow-hidden grayscale group-hover:grayscale-0 transition-all relative">
-                        <img src="img/smartcity.png" alt="Smart City Darmajaya" class="w-full h-full object-cover opacity-40">
-                        <a href="https://smartcity.darmajaya.ac.id" target="_blank" class="absolute top-4 right-4 live-link">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                        </a>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-amber-400">SMART_CITY_PROJ</h3>
-                            <span class="text-[10px] text-slate-500">[IOT_WEB]</span>
-                        </div>
-                        <p class="text-xl text-slate-400 mb-6">Smart City Research Center. Integration of urban data with interactive map-based visualization.</p>
-                        <div class="flex gap-2">
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">GEOMAP</span>
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">REALTIME</span>
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">IOT</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- IoT Greenhouse Tani Cerdas -->
-                <div class="pixel-border group overflow-hidden">
-                    <div class="h-48 bg-slate-900 border-b-2 border-[#30363d] overflow-hidden grayscale group-hover:grayscale-0 transition-all relative">
-                        <img src="img/tanicerdas.png" alt="IoT Greenhouse Tani Cerdas" class="w-full h-full object-cover opacity-40">
-                        <a href="https://neliti-sk.darmajaya.ac.id" target="_blank" class="absolute top-4 right-4 live-link">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                        </a>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-bold text-amber-400">IOT_GREENHOUSE_TANI_CERDAS</h3>
-                            <span class="text-[10px] text-slate-500">[IOT_WEB]</span>
-                        </div>
-                        <p class="text-xl text-slate-400 mb-6">IoT Greenhouse Tani Cerdas. Monitoring and control of greenhouse environment using IoT technology.</p>
-                        <div class="flex gap-2">
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">GEOMAP</span>
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">REALTIME</span>
-                            <span class="text-xs bg-[#161b22] px-2 py-1 border border-[#30363d]">IOT</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-20 px-4 max-w-4xl mx-auto">
-        <div class="pixel-border p-8 md:p-12">
-            <div class="flex items-center gap-3 mb-10">
-                <span class="text-emerald-500 text-2xl font-bold">></span>
-                <h2 class="font-pixel text-lg md:text-xl text-white uppercase truncate">BUILD_CONNECTION</h2>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div class="font-mono space-y-4">
-                    <p class="text-xl text-slate-400">Feel free to reach out if you have any questions or would like to collaborate on a project.</p>
-                    <div class="p-4 border-l-2 border-emerald-500 bg-emerald-500/5">
-                        <span class="text-xs text-emerald-500 font-pixel uppercase">REMOTE_ACCESS</span>
-                        <p class="text-lg mt-1">Status: Listening on all ports...</p>
-                    </div>
-                </div>
-
-                <div class="space-y-3 font-mono">
-                    <a href="mailto:ramadanzah205@gmail.com" class="loot-link" target="_blank">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Email" class="opacity-70">
-                        <div class="overflow-hidden">
-                            <span class="text-xs text-slate-500 block uppercase">EMAIL</span>
-                            <span class="text-lg md:text-xl truncate block">ramadanzah205@gmail.com</span>
-                        </div>
-                    </a>
-                    <a href="https://github.com/ramadanzah-dev" class="loot-link" target="_blank">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" class="invert opacity-70">
-                        <div>
-                            <span class="text-xs text-slate-500 block uppercase">GITHUB</span>
-                            <span class="text-lg md:text-xl">/ramadanzah-dev</span>
-                        </div>
-                    </a>
-                    <a href="https://wa.me/6285117726607" class="loot-link" target="_blank">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="opacity-70">
-                        <div>
-                            <span class="text-xs text-slate-500 block uppercase">WHATSAPP</span>
-                            <span class="text-lg md:text-xl">Send a Message</span>
-                        </div>
-                    </a>
-                    <a href="https://www.linkedin.com/in/ramadanzah/" class="loot-link" target="_blank">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="LinkedIn" class="opacity-70">
-                        <div>
-                            <span class="text-xs text-slate-500 block uppercase">LINKEDIN</span>
-                            <span class="text-lg md:text-xl">Connect with me</span>
-                        </div>
-                    </a>
-                     <a href="https://www.youtube.com/@ramadanzahFx" class="loot-link" target="_blank">
-                        <img src="img/youtube.png" alt="YouTube" class="opacity-70">
-                        <div class="overflow-hidden">
-                            <span class="text-xs text-slate-500 block uppercase">YOUTUBE</span>
-                            <span class="text-lg md:text-xl truncate block">Subscribe! if you like my content</span>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="py-12 text-center border-t border-[#30363d] bg-[#0d1117] font-mono text-slate-500">
-        <p class="text-lg mb-2 uppercase">RAMADANZAH-DEV © 2024</p>
-        <p class="text-xs uppercase tracking-widest">Built with precision and low latency code.</p>
-    </footer>
-
-    <script src="script.js"?v=1.0></script>
-</body>
+      // Jalankan saat load
+      window.onload = initTerminal;
+    </script>
+  </body>
 </html>
