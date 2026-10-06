@@ -1,0 +1,715 @@
+/* =========================================================
+   Halaman pemeliharaan | Ramadanzah
+   Tokens -> reset -> backdrop -> layout -> komponen -> motion
+   ========================================================= */
+
+/* ---------- 1. Font self-hosted ---------- */
+@font-face {
+  font-family: "Schibsted Grotesk";
+  src: url("assets/schibsted-grotesk-latin.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/plex-mono-400-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/plex-mono-500-latin.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- 2. Design tokens ---------- */
+:root {
+  --bg: #0c0a09;
+  --surface: #1c1917;
+  --surface-2: #292524;
+  --text: #fafaf9;
+  --text-muted: #a8a29e;
+
+  --accent: #f59e0b;
+  --accent-hover: #fbbf24;
+  --accent-strong: #b45309;
+  --accent-ink: #1c1917;
+  --accent-soft: rgba(245, 158, 11, 0.16);
+
+  --line: rgba(250, 250, 249, 0.14);
+  --line-soft: rgba(250, 250, 249, 0.08);
+
+  --r: 14px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --font-sans: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --shell: 1400px;
+  --gutter: clamp(1rem, 4vw, 3.5rem);
+
+  --z-backdrop: 0;
+  --z-content: 1;
+}
+
+/* ---------- 3. Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+p,
+ol,
+ul {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------- 4. Backdrop (bergerak, fixed) ---------- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-backdrop);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.backdrop__photo {
+  position: absolute;
+  inset: -6%;
+  background: url("assets/hero-maintenance.jpg") center / cover no-repeat;
+  filter: grayscale(1) brightness(0.52) contrast(1.05);
+  opacity: 0.3;
+  transform: scale(1.06);
+}
+
+.backdrop__glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+  will-change: transform;
+}
+
+.backdrop__glow--a {
+  width: min(62vw, 44rem);
+  aspect-ratio: 1;
+  top: -12%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent 65%);
+}
+
+.backdrop__glow--b {
+  width: min(56vw, 38rem);
+  aspect-ratio: 1;
+  bottom: -14%;
+  right: -12%;
+  background: radial-gradient(circle, rgba(180, 83, 9, 0.34), transparent 65%);
+}
+
+.backdrop__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 10, 9, 0.86) 0%,
+    rgba(12, 10, 9, 0.66) 42%,
+    rgba(12, 10, 9, 0.94) 100%
+  );
+}
+
+.backdrop__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* ---------- 5. Shell & layout ---------- */
+.shell {
+  position: relative;
+  z-index: var(--z-content);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3rem, 8vh, 5.5rem);
+  width: 100%;
+  max-width: var(--shell);
+  min-height: 100dvh;
+  margin-inline: auto;
+  padding: 0 var(--gutter);
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3rem, 8vh, 5.5rem);
+  flex: 1;
+}
+
+.hero {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  padding-block: clamp(3.5rem, 9vh, 6rem) clamp(1rem, 4vh, 2rem);
+}
+
+/* ---------- 6. Hero copy ---------- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.eyebrow__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.hero__title {
+  margin-top: 1.25rem;
+  max-width: 15ch;
+  font-size: clamp(2.35rem, 6.4vw, 4.25rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.hero__sub {
+  margin-top: 1.25rem;
+  max-width: 46ch;
+  font-size: clamp(1rem, 1.3vw, 1.125rem);
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+/* ---------- 7. Panel: countdown + progress ---------- */
+.panel {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background-color: rgba(28, 25, 23, 0.78);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow:
+    0 40px 70px -40px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(250, 250, 249, 0.06);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .panel {
+    background-color: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+.countdown__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.countdown__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.unit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem clamp(0.4rem, 2vw, 1rem);
+  border-left: 1px solid var(--line-soft);
+}
+
+.unit:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.unit__value {
+  font-family: var(--font-mono);
+  font-size: clamp(1.6rem, 6vw, 2.6rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit__name {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.countdown__stamp {
+  margin-top: 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.progress {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line-soft);
+}
+
+.progress__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.progress__title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.progress__value {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress__track {
+  position: relative;
+  height: 6px;
+  margin-top: 0.75rem;
+  border-radius: var(--r);
+  background-color: rgba(250, 250, 249, 0.1);
+  overflow: hidden;
+}
+
+.progress__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: inherit;
+  background-image: linear-gradient(90deg, var(--accent-strong), var(--accent));
+  transition: width 0.9s var(--ease);
+}
+
+.progress__fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+}
+
+.progress__note {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* ---------- 8. Form notifikasi ---------- */
+.notify {
+  padding-block: clamp(2.5rem, 7vh, 4.5rem);
+  border-top: 1px solid var(--line-soft);
+}
+
+.notify__inner {
+  max-width: 44rem;
+}
+
+.notify__title {
+  font-size: clamp(1.5rem, 3.4vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.notify__lead {
+  margin-top: 0.6rem;
+  max-width: 58ch;
+  color: var(--text-muted);
+}
+
+.notify__form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.field__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.field__input {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--text);
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 0.9rem 1.1rem;
+  transition:
+    border-color 0.3s var(--ease),
+    box-shadow 0.3s var(--ease),
+    background-color 0.3s var(--ease);
+}
+
+.field__input::placeholder {
+  color: rgba(250, 250, 249, 0.55);
+}
+
+.field__input:hover {
+  border-color: rgba(250, 250, 249, 0.3);
+}
+
+.field__input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.field__input[aria-invalid="true"] {
+  border-color: var(--accent);
+}
+
+.btn {
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background-color: var(--accent);
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  padding: 0.9rem 1.7rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.25s var(--ease),
+    background-color 0.25s var(--ease),
+    box-shadow 0.25s var(--ease);
+}
+
+.btn:hover {
+  background-color: var(--accent-hover);
+  box-shadow: 0 16px 30px -18px rgba(245, 158, 11, 0.9);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.notify__help {
+  margin-top: 0.85rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.notify__msg {
+  min-height: 1.5rem;
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.notify__msg[data-state="success"] {
+  color: var(--accent);
+}
+
+.notify__msg[data-state="error"] {
+  color: var(--text);
+}
+
+/* ---------- 9. Footer ---------- */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-block: 2rem 2.5rem;
+  border-top: 1px solid var(--line-soft);
+}
+
+.footer__name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.footer__role,
+.footer__copy {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.footer__copy {
+  margin-top: 0.2rem;
+}
+
+.footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+
+.footer__mail {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line);
+  transition: color 0.3s var(--ease), text-decoration-color 0.3s var(--ease);
+}
+
+.footer__mail:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.socials {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.social {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: var(--text-muted);
+  background-color: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  transition:
+    color 0.3s var(--ease),
+    border-color 0.3s var(--ease),
+    background-color 0.3s var(--ease),
+    transform 0.3s var(--ease);
+}
+
+.social svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.social:hover {
+  color: var(--accent);
+  border-color: rgba(245, 158, 11, 0.55);
+  background-color: var(--accent-soft);
+  transform: translateY(-2px);
+}
+
+.social:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ---------- 10. Layout desktop (>= 768px) ---------- */
+@media (min-width: 768px) {
+  .hero {
+    grid-template-columns: 1.25fr 1fr;
+    align-items: end;
+  }
+
+  .notify__form {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+
+/* ---------- 11. Motion: entrance bertahap ---------- */
+.reveal {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    animation: rise 0.9s var(--ease) both;
+  }
+
+  .reveal--1 { animation-delay: 0.05s; }
+  .reveal--2 { animation-delay: 0.15s; }
+  .reveal--3 { animation-delay: 0.25s; }
+  .reveal--4 { animation-delay: 0.38s; }
+  .reveal--5 { animation-delay: 0.5s; }
+
+  .backdrop__photo {
+    animation: drift 44s var(--ease) infinite alternate;
+  }
+
+  .backdrop__glow--a {
+    animation: float-a 22s ease-in-out infinite alternate;
+  }
+
+  .backdrop__glow--b {
+    animation: float-b 28s ease-in-out infinite alternate;
+  }
+
+  .progress__fill::after {
+    animation: sweep 2.6s var(--ease) infinite;
+  }
+
+  .unit__value.is-tick {
+    animation: tick 0.35s var(--ease);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: scale(1.06) translate3d(-1.5%, -1%, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(1.5%, 1.5%, 0);
+  }
+}
+
+@keyframes float-a {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(7%, 9%, 0);
+  }
+}
+
+@keyframes float-b {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-8%, -6%, 0);
+  }
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes tick {
+  from {
+    opacity: 0.35;
+    transform: translateY(-0.2em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- 12. Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .backdrop__photo,
+  .backdrop__glow,
+  .progress__fill::after {
+    animation: none !important;
+  }
+
+  .social:hover,
+  .btn:hover {
+    transform: none;
+  }
+}

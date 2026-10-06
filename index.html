@@ -1,746 +1,113 @@
-<!doctype html>
-<html lang="id" class="scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ramadanzah | Web &amp; IoT Developer</title>
-    <meta
-      name="description"
-      content="Portofolio Ramadanzah — Web & IoT Developer. Merancang antarmuka web yang bersih dan menghubungkannya dengan perangkat keras cerdas."
-    />
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dalam Perbaikan | Ramadanzah</title>
+  <meta name="description" content="Situs Ramadanzah sedang dalam pemeliharaan sistem. Layanan kembali online sesuai perkiraan waktu yang tertera di halaman ini.">
+  <meta name="theme-color" content="#0c0a09">
+  <meta name="color-scheme" content="dark">
+  <link rel="preload" href="assets/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/hero-maintenance.jpg" as="image">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="backdrop" aria-hidden="true">
+    <div class="backdrop__photo"></div>
+    <span class="backdrop__glow backdrop__glow--a"></span>
+    <span class="backdrop__glow backdrop__glow--b"></span>
+    <div class="backdrop__scrim"></div>
+    <div class="backdrop__grain"></div>
+  </div>
 
-    <!-- Google Fonts: Newsreader (display), Schibsted Grotesk (body), IBM Plex Mono (data) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=IBM+Plex+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+  <div class="shell">
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero__copy">
+          <p class="eyebrow reveal reveal--1"><span class="eyebrow__dot"></span>Pemeliharaan sistem berlangsung</p>
+          <h1 class="hero__title reveal reveal--2" id="hero-title">Kami Sedang Dalam Perbaikan</h1>
+          <p class="hero__sub reveal reveal--3">Layanan dimatikan sebentar untuk perbaikan keamanan dan performa. Situs kembali sebelum perkiraan selesai.</p>
+        </div>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-    <script>
-      // Tema (Dark/Light) dicek sebelum halaman dimuat penuh agar tidak berkedip (FOUC)
-      if (
-        localStorage.theme === "dark" ||
-        (!("theme" in localStorage) &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches)
-      ) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['"Schibsted Grotesk"', "sans-serif"],
-              display: ["Newsreader", "Georgia", "serif"],
-              mono: ['"IBM Plex Mono"', "ui-monospace", "monospace"],
-            },
-            colors: {
-              paper: "#fafaf9",
-              ink: "#1c1917",
-              accent: "#b45309", // teks aksen di tema terang (kontras >= 4.5:1 di atas paper)
-              signal: "#f59e0b", // aksen di tema gelap
-            },
-          },
-        },
-      };
-    </script>
-
-    <style type="text/tailwindcss">
-      body {
-        font-family: "Schibsted Grotesk", sans-serif;
-      }
-
-      /* Satu momen otentik: pembuka hero */
-      .rv {
-        display: block;
-        overflow: hidden;
-      }
-      .rv > span {
-        display: block;
-        transform: translateY(115%);
-        animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-      .rv:nth-child(2) > span {
-        animation-delay: 0.08s;
-      }
-      .rv:nth-child(3) > span {
-        animation-delay: 0.16s;
-      }
-      @keyframes rise {
-        to {
-          transform: translateY(0);
-        }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .rv > span {
-          animation: none;
-          transform: none;
-        }
-        html {
-          scroll-behavior: auto;
-        }
-      }
-
-      /* Permukaan browser ikut desain */
-      ::selection {
-        @apply bg-accent/20 dark:bg-signal/30;
-      }
-      ::-webkit-scrollbar {
-        width: 10px;
-      }
-      ::-webkit-scrollbar-track {
-        @apply bg-paper dark:bg-stone-950;
-      }
-      ::-webkit-scrollbar-thumb {
-        @apply bg-stone-300 dark:bg-stone-700;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        @apply bg-stone-400 dark:bg-stone-600;
-      }
-      :focus-visible {
-        outline: 2px solid theme("colors.accent");
-        outline-offset: 3px;
-      }
-      .dark :focus-visible,
-      .dark:focus-visible {
-        outline-color: theme("colors.signal");
-      }
-    </style>
-  </head>
-  <body
-    class="bg-paper dark:bg-stone-950 text-ink dark:text-stone-100 antialiased transition-colors duration-300"
-  >
-    <!-- Lewati ke konten -->
-    <a
-      href="#utama"
-      class="sr-only focus:not-sr-only focus:absolute focus:z-[60] focus:top-3 focus:left-3 focus:bg-stone-900 focus:text-stone-50 focus:px-4 focus:py-2 focus:text-sm"
-      >Langsung ke konten</a
-    >
-
-    <!-- Masthead -->
-    <nav
-      class="fixed w-full z-50 bg-paper/95 dark:bg-stone-950/95 border-b border-stone-200 dark:border-stone-800 transition-colors duration-300"
-    >
-      <div class="max-w-6xl mx-auto px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <a
-            href="#"
-            class="flex items-center gap-2.5 group"
-            aria-label="Ramadanzah — kembali ke atas"
-          >
-            <i class="ph ph-terminal text-lg text-accent dark:text-signal"></i>
-            <span class="font-display font-semibold text-lg tracking-tight"
-              >Ramadanzah<span class="text-accent dark:text-signal"
-                >.</span
-              ></span
-            >
-          </a>
-
-          <!-- Menu desktop -->
-          <div class="hidden md:flex items-center gap-8">
-            <a
-              href="#about"
-              class="text-sm text-stone-600 dark:text-stone-400 hover:text-ink dark:hover:text-stone-100 underline-offset-4 hover:underline transition-colors"
-              >Tentang</a
-            >
-            <a
-              href="#skills"
-              class="text-sm text-stone-600 dark:text-stone-400 hover:text-ink dark:hover:text-stone-100 underline-offset-4 hover:underline transition-colors"
-              >Keahlian</a
-            >
-            <a
-              href="#projects"
-              class="text-sm text-stone-600 dark:text-stone-400 hover:text-ink dark:hover:text-stone-100 underline-offset-4 hover:underline transition-colors"
-              >Proyek</a
-            >
-            <button
-              id="theme-toggle"
-              class="p-2 text-stone-500 dark:text-stone-400 hover:text-accent dark:hover:text-signal transition-colors focus:outline-none"
-              aria-label="Ganti tema terang/gelap"
-            >
-              <i class="ph-fill ph-sun text-xl hidden dark:block"></i>
-              <i class="ph-fill ph-moon text-xl block dark:hidden"></i>
-            </button>
-            <a
-              href="#contact"
-              class="text-sm font-medium px-5 py-2.5 bg-ink dark:bg-stone-100 text-paper dark:text-ink hover:bg-stone-700 dark:hover:bg-white transition-colors"
-              >Hubungi Saya</a
-            >
+        <div class="panel reveal reveal--4">
+          <div class="countdown" role="timer" aria-live="off" aria-label="Hitung mundur menuju selesai">
+            <p class="countdown__label">Perkiraan selesai</p>
+            <ol class="countdown__grid">
+              <li class="unit">
+                <span class="unit__value" data-unit="days">00</span>
+                <span class="unit__name">Hari</span>
+              </li>
+              <li class="unit">
+                <span class="unit__value" data-unit="hours">00</span>
+                <span class="unit__name">Jam</span>
+              </li>
+              <li class="unit">
+                <span class="unit__value" data-unit="minutes">00</span>
+                <span class="unit__name">Menit</span>
+              </li>
+              <li class="unit">
+                <span class="unit__value" data-unit="seconds">00</span>
+                <span class="unit__name">Detik</span>
+              </li>
+            </ol>
+            <p class="countdown__stamp" id="eta-stamp">Jumat, 9 Oktober 2026 pukul 21.00 WIB</p>
           </div>
 
-          <!-- Toggle & menu mobile -->
-          <div class="md:hidden flex items-center gap-3">
-            <button
-              id="mobile-theme-toggle"
-              class="p-2 text-stone-500 dark:text-stone-400 hover:text-accent dark:hover:text-signal transition-colors focus:outline-none"
-              aria-label="Ganti tema terang/gelap"
-            >
-              <i class="ph-fill ph-sun text-xl hidden dark:block"></i>
-              <i class="ph-fill ph-moon text-xl block dark:hidden"></i>
-            </button>
-            <button
-              id="mobile-menu-btn"
-              class="p-2 text-stone-600 dark:text-stone-400 hover:text-ink dark:hover:text-stone-100 focus:outline-none"
-              aria-label="Buka menu navigasi"
-              aria-expanded="false"
-              aria-controls="mobile-menu"
-            >
-              <i class="ph ph-list text-2xl"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel menu mobile -->
-      <div
-        id="mobile-menu"
-        class="hidden md:hidden absolute w-full bg-paper dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 transition-colors duration-300"
-      >
-        <div class="px-6 py-6 space-y-5 flex flex-col">
-          <a
-            href="#about"
-            class="text-base text-stone-600 dark:text-stone-400 hover:text-ink dark:hover:text-stone-100 mobile-link"
-            >Tentang</a
-          >
-          <a
-            href="#skills"
-            class="text-base text-stone-600 dark:text-stone-400 hover:text-ink dark:hover:text-stone-100 mobile-link"
-            >Keahlian</a
-          >
-          <a
-            href="#projects"
-            class="text-base text-stone-600 dark:text-stone-400 hover:text-ink dark:hover:text-stone-100 mobile-link"
-            >Proyek</a
-          >
-          <a
-            href="#contact"
-            class="text-base font-medium text-accent dark:text-signal mobile-link"
-            >Hubungi Saya</a
-          >
-        </div>
-      </div>
-    </nav>
-
-    <main id="utama">
-      <!-- Hero -->
-      <section id="home" class="pt-36 pb-24 lg:pt-44 lg:pb-32">
-        <div class="max-w-6xl mx-auto px-6 lg:px-8">
-          <p
-            class="rv mb-8 font-mono text-xs uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400"
-          >
-            <span class="inline-flex items-center gap-2.5">
-              <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
-                <span
-                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent dark:bg-signal opacity-60"
-                ></span>
-                <span
-                  class="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent dark:bg-signal"
-                ></span>
-              </span>
-              Tersedia untuk proyek baru
-            </span>
-          </p>
-
-          <h1
-            class="font-display font-medium text-[clamp(2.75rem,7vw,5rem)] leading-[1.05] tracking-[-0.03em] max-w-4xl"
-          >
-            <span class="rv"><span>Membangun jembatan antara</span></span>
-            <span class="rv"
-              ><span
-                >dunia
-                <em class="italic text-accent dark:text-signal"
-                  >Digital</em
-                ></span
-              ></span
-            >
-            <span class="rv"
-              ><span
-                >&amp;
-                <em class="italic text-accent dark:text-signal">Fisik</em
-                >.</span
-              ></span
-            >
-          </h1>
-
-          <div
-            class="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-end"
-          >
-            <div class="lg:col-span-7">
-              <p
-                class="text-lg leading-relaxed text-stone-600 dark:text-stone-400 max-w-xl"
-              >
-                Halo, saya Ramadanzah. Seorang Web Developer dan penggiat
-                Internet of Things (IoT). Saya merancang antarmuka web yang
-                bersih dan menghubungkannya dengan perangkat keras cerdas untuk
-                menciptakan solusi inovatif.
-              </p>
-              <div class="mt-10 flex flex-wrap items-center gap-4">
-                <a
-                  href="#projects"
-                  class="group inline-flex items-center gap-2 px-6 py-3.5 bg-ink dark:bg-stone-100 text-paper dark:text-ink text-sm font-medium hover:bg-stone-700 dark:hover:bg-white transition-colors"
-                >
-                  Lihat Karya Saya
-                  <i
-                    class="ph ph-arrow-right text-base transition-transform duration-300 group-hover:translate-x-1"
-                  ></i>
-                </a>
-                <a
-                  href="https://github.com/ramadanzah-dev"
-                  target="_blank"
-                  rel="noopener"
-                  class="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-medium border border-stone-300 dark:border-stone-700 hover:border-ink dark:hover:border-stone-300 transition-colors"
-                >
-                  <i class="ph-fill ph-github-logo text-lg"></i>
-                  GitHub
-                </a>
-              </div>
+          <div class="progress">
+            <div class="progress__head">
+              <h2 class="progress__title">Progres pemeliharaan</h2>
+              <span class="progress__value" id="progress-value">0%</span>
             </div>
-
-            <figure
-              class="lg:col-span-5 lg:justify-self-end w-full max-w-[340px]"
-            >
-              <div
-                class="border border-stone-200 dark:border-stone-800 p-2 bg-white dark:bg-stone-900 transition-colors duration-300"
-              >
-                <img
-                  src="ramadanzah.png"
-                  alt="Foto Ramadanzah"
-                  width="340"
-                  height="425"
-                  class="w-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                  style="aspect-ratio: 4/5"
-                />
-              </div>
-              <figcaption
-                class="mt-3 font-mono text-xs text-stone-500 dark:text-stone-400"
-              >
-                Ramadanzah — Web &amp; IoT Developer
-              </figcaption>
-            </figure>
+            <!-- div+role dipakai supaya transisi lebar pakai CSS mulus di semua browser -->
+            <!-- [html-validate-disable-next prefer-native-element] -->
+            <div class="progress__track" id="progress-track" role="progressbar" aria-label="Progres pemeliharaan" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress__fill" id="progress-fill"></span>
+            </div>
+            <p class="progress__note" id="progress-note">Tim sedang menyelesaikan pemeriksaan bertahap.</p>
           </div>
         </div>
       </section>
 
-      <!-- Tentang & Keahlian -->
-      <section
-        id="about"
-        class="scroll-mt-20 py-24 border-t border-stone-200 dark:border-stone-800 transition-colors duration-300"
-      >
-        <div class="max-w-6xl mx-auto px-6 lg:px-8">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            <div>
-              <h2
-                class="font-display font-medium text-4xl tracking-[-0.02em] leading-tight mb-8"
-              >
-                Menggabungkan kode dengan perangkat keras.
-              </h2>
-              <div
-                class="space-y-5 leading-relaxed text-stone-600 dark:text-stone-400 max-w-xl"
-              >
-                <p>
-                  Ketertarikan saya pada teknologi dimulai dari rasa penasaran
-                  bagaimana cara kerja sebuah website, hingga berkembang menjadi
-                  keinginan untuk mengontrol benda-benda fisik melalui internet.
-                </p>
-                <p>
-                  Sebagai penggiat IoT dan Web Developer, saya fokus menciptakan
-                  arsitektur yang efisien. Dari merancang
-                  <i>dashboard</i> analitik interaktif menggunakan React atau
-                  Tailwind, hingga memprogram mikrokontroler seperti ESP32 untuk
-                  mengirim data sensor secara <i>real-time</i>.
-                </p>
-                <p>
-                  Saya percaya bahwa desain yang baik bukan hanya tentang
-                  bagaimana sesuatu terlihat, tetapi juga bagaimana sesuatu itu
-                  berfungsi tanpa hambatan bagi penggunanya.
-                </p>
-              </div>
+      <section class="notify" aria-labelledby="notify-title">
+        <div class="notify__inner reveal reveal--5">
+          <h2 class="notify__title" id="notify-title">Beri tahu saya saat online</h2>
+          <p class="notify__lead">Masukkan email, kami kirim satu notifikasi begitu layanan pulih.</p>
+
+          <form class="notify__form" id="notify-form" novalidate>
+            <div class="field">
+              <label class="field__label" for="email">Alamat email</label>
+              <input class="field__input" type="email" id="email" name="email" autocomplete="email" inputmode="email" placeholder="nama@domain.com" required aria-describedby="email-help">
             </div>
+            <button class="btn" type="submit">Kirim notifikasi</button>
+          </form>
 
-            <div id="skills" class="scroll-mt-24 lg:pt-2">
-              <div class="border-t border-stone-200 dark:border-stone-800 py-8">
-                <h3
-                  class="text-sm font-semibold mb-4 flex items-center gap-2.5"
-                >
-                  <i
-                    class="ph ph-monitor text-accent dark:text-signal text-lg"
-                    aria-hidden="true"
-                  ></i>
-                  Web Development
-                </h3>
-                <p
-                  class="font-mono text-sm leading-8 text-stone-700 dark:text-stone-300"
-                >
-                  HTML &amp; CSS<span
-                    class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >JavaScript<span
-                    class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >Laravel<span class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >Tailwind CSS<span
-                    class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >Node.js<span class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >API Integration
-                </p>
-              </div>
-              <div class="border-t border-stone-200 dark:border-stone-800 py-8">
-                <h3
-                  class="text-sm font-semibold mb-4 flex items-center gap-2.5"
-                >
-                  <i
-                    class="ph ph-cpu text-accent dark:text-signal text-lg"
-                    aria-hidden="true"
-                  ></i>
-                  Internet of Things (IoT)
-                </h3>
-                <p
-                  class="font-mono text-sm leading-8 text-stone-700 dark:text-stone-300"
-                >
-                  Arduino<span class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >ESP8266 / ESP32<span
-                    class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >HTTP Post<span
-                    class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >MQTT Protocol<span
-                    class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >C++<span class="mx-2 text-stone-300 dark:text-stone-600"
-                    >·</span
-                  >Sensor Integrations
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Proyek -->
-      <section
-        id="projects"
-        class="scroll-mt-20 py-24 border-t border-stone-200 dark:border-stone-800 transition-colors duration-300"
-      >
-        <div class="max-w-6xl mx-auto px-6 lg:px-8">
-          <div
-            class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
-          >
-            <h2
-              class="font-display font-medium text-4xl sm:text-5xl tracking-[-0.02em] leading-tight"
-            >
-              Proyek pilihan.
-            </h2>
-            <p
-              class="text-stone-600 dark:text-stone-400 max-w-md leading-relaxed"
-            >
-              Beberapa eksperimen dan proyek nyata yang menggabungkan antarmuka
-              web modern dengan sistem cerdas di belakang layar.
-            </p>
-          </div>
-
-          <div class="space-y-0">
-            <!-- Proyek 1 -->
-            <article
-              class="group grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 py-14 border-t border-stone-200 dark:border-stone-800"
-            >
-              <a
-                href="https://neliti-sk.darmajaya.ac.id"
-                target="_blank"
-                rel="noopener"
-                class="md:col-span-7 block overflow-hidden border border-stone-200 dark:border-stone-800"
-                tabindex="-1"
-                aria-hidden="true"
-              >
-                <img
-                  src="neliti-sk.png"
-                  alt=""
-                  loading="lazy"
-                  class="w-full h-full object-cover aspect-[16/10] group-hover:scale-[1.03] transition-transform duration-700"
-                />
-              </a>
-              <div class="md:col-span-5 flex flex-col justify-center">
-                <p
-                  class="font-mono text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 mb-4"
-                >
-                  IoT · Web Dashboard · Apps
-                </p>
-                <h3
-                  class="font-display font-medium text-2xl sm:text-3xl leading-snug tracking-[-0.01em] mb-4"
-                >
-                  <a
-                    href="https://neliti-sk.darmajaya.ac.id"
-                    target="_blank"
-                    rel="noopener"
-                    class="underline-offset-4 group-hover:underline decoration-2 decoration-accent dark:decoration-signal"
-                  >
-                    Internet of Things sebagai media kontrol dan monitoring
-                    Green House
-                  </a>
-                </h3>
-                <p
-                  class="leading-relaxed text-stone-600 dark:text-stone-400 mb-6"
-                >
-                  Sistem pemantauan suhu dan kelembaban rumah kaca secara
-                  real-time menggunakan ESP32, sensor DHT22, dan platform web
-                  untuk menampilkan data secara interaktif.
-                </p>
-                <a
-                  href="https://neliti-sk.darmajaya.ac.id"
-                  target="_blank"
-                  rel="noopener"
-                  class="group/link inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
-                >
-                  Kunjungi situs
-                  <i
-                    class="ph ph-arrow-up-right transition-transform duration-300 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
-                  ></i>
-                </a>
-              </div>
-            </article>
-
-            <!-- Proyek 2 -->
-            <article
-              class="group grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 py-14 border-t border-stone-200 dark:border-stone-800"
-            >
-              <a
-                href="https://pti.darmajaya.ac.id"
-                target="_blank"
-                rel="noopener"
-                class="md:col-span-7 md:order-2 block overflow-hidden border border-stone-200 dark:border-stone-800"
-                tabindex="-1"
-                aria-hidden="true"
-              >
-                <img
-                  src="pti.png"
-                  alt=""
-                  loading="lazy"
-                  class="w-full h-full object-cover aspect-[16/10] group-hover:scale-[1.03] transition-transform duration-700"
-                />
-              </a>
-              <div
-                class="md:col-span-5 md:order-1 flex flex-col justify-center"
-              >
-                <p
-                  class="font-mono text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 mb-4"
-                >
-                  Web · Laravel
-                </p>
-                <h3
-                  class="font-display font-medium text-2xl sm:text-3xl leading-snug tracking-[-0.01em] mb-4"
-                >
-                  <a
-                    href="https://pti.darmajaya.ac.id"
-                    target="_blank"
-                    rel="noopener"
-                    class="underline-offset-4 group-hover:underline decoration-2 decoration-accent dark:decoration-signal"
-                  >
-                    Membangun Website Program Studi Pendidikan Teknologi
-                    Informasi
-                  </a>
-                </h3>
-                <p
-                  class="leading-relaxed text-stone-600 dark:text-stone-400 mb-6"
-                >
-                  Website resmi untuk Program Studi Pendidikan Teknologi
-                  Informasi Institut Informatika dan Bisnis Darmajaya. Dibangun
-                  menggunakan Laravel, untuk pengalaman pengguna yang
-                  interaktif.
-                </p>
-                <a
-                  href="https://pti.darmajaya.ac.id"
-                  target="_blank"
-                  rel="noopener"
-                  class="group/link inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
-                >
-                  Kunjungi situs
-                  <i
-                    class="ph ph-arrow-up-right transition-transform duration-300 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
-                  ></i>
-                </a>
-              </div>
-            </article>
-
-            <!-- Proyek 3 -->
-            <article
-              class="group grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 py-14 border-t border-b border-stone-200 dark:border-stone-800"
-            >
-              <a
-                href="https://lpm.darmajaya.ac.id"
-                target="_blank"
-                rel="noopener"
-                class="md:col-span-7 block overflow-hidden border border-stone-200 dark:border-stone-800"
-                tabindex="-1"
-                aria-hidden="true"
-              >
-                <img
-                  src="lpm.png"
-                  alt=""
-                  loading="lazy"
-                  class="w-full h-full object-cover aspect-[16/10] group-hover:scale-[1.03] transition-transform duration-700"
-                />
-              </a>
-              <div class="md:col-span-5 flex flex-col justify-center">
-                <p
-                  class="font-mono text-xs uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 mb-4"
-                >
-                  Web · Laravel
-                </p>
-                <h3
-                  class="font-display font-medium text-2xl sm:text-3xl leading-snug tracking-[-0.01em] mb-4"
-                >
-                  <a
-                    href="https://lpm.darmajaya.ac.id"
-                    target="_blank"
-                    rel="noopener"
-                    class="underline-offset-4 group-hover:underline decoration-2 decoration-accent dark:decoration-signal"
-                  >
-                    Membangun Website Lembaga Penjaminan Mutu (LPM) Darmajaya
-                  </a>
-                </h3>
-                <p
-                  class="leading-relaxed text-stone-600 dark:text-stone-400 mb-6"
-                >
-                  Website yang berfokus menampilkan informasi dan layanan
-                  Lembaga Penjaminan Mutu (LPM) Darmajaya. Dibangun menggunakan
-                  Laravel untuk memberikan pengalaman pengguna yang interaktif
-                  dan responsif.
-                </p>
-                <a
-                  href="https://lpm.darmajaya.ac.id"
-                  target="_blank"
-                  rel="noopener"
-                  class="group/link inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline"
-                >
-                  Kunjungi situs
-                  <i
-                    class="ph ph-arrow-up-right transition-transform duration-300 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
-                  ></i>
-                </a>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <!-- Kontak -->
-      <section
-        id="contact"
-        class="scroll-mt-20 py-28 border-t border-stone-200 dark:border-stone-800 transition-colors duration-300"
-      >
-        <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
-          <h2
-            class="font-display font-medium text-4xl sm:text-5xl tracking-[-0.02em] leading-tight mb-6"
-          >
-            Mari Ciptakan Sesuatu Bersama.
-          </h2>
-          <p
-            class="text-lg leading-relaxed text-stone-600 dark:text-stone-400 max-w-2xl mx-auto mb-12"
-          >
-            Tertarik untuk berkolaborasi, memiliki proyek IoT/Web yang ingin
-            diwujudkan, atau sekadar ingin menyapa? Kotak masuk saya selalu
-            terbuka.
-          </p>
-          <a
-            href="mailto:halo@ramadanzah.com"
-            class="group inline-flex flex-wrap items-baseline justify-center gap-x-3 font-display text-2xl sm:text-4xl tracking-[-0.01em] underline decoration-stone-300 dark:decoration-stone-700 underline-offset-8 hover:decoration-accent dark:hover:decoration-signal transition-colors"
-          >
-            halo@ramadanzah.com
-            <i
-              class="ph ph-arrow-up-right text-xl sm:text-2xl transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
-              aria-hidden="true"
-            ></i>
-          </a>
+          <p class="notify__help" id="email-help">Satu email saja untuk kabar ini. Tanpa newsletter.</p>
+          <p class="notify__msg" id="notify-msg" role="status" aria-live="polite"></p>
         </div>
       </section>
     </main>
 
-    <!-- Footer -->
-    <footer
-      class="py-10 border-t border-stone-200 dark:border-stone-800 transition-colors duration-300"
-    >
-      <div
-        class="max-w-6xl mx-auto px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4"
-      >
-        <p class="text-sm text-stone-500 dark:text-stone-400">
-          &copy; <span id="year">2026</span> Ramadanzah. Konten ini dilisensikan
-          di bawah CC BY-NC 4.0.
-        </p>
-        <div class="flex items-center gap-6">
-          <a
-            href="https://github.com/ramadanzah-dev"
-            target="_blank"
-            rel="noopener"
-            class="text-stone-400 dark:text-stone-500 hover:text-ink dark:hover:text-stone-100 transition-colors"
-            aria-label="GitHub Ramadanzah"
-          >
-            <i class="ph-fill ph-github-logo text-2xl"></i>
-          </a>
-          <a
-            href="mailto:halo@ramadanzah.com"
-            class="text-stone-400 dark:text-stone-500 hover:text-ink dark:hover:text-stone-100 transition-colors"
-            aria-label="Email Ramadanzah"
-          >
-            <i class="ph-fill ph-envelope-simple text-2xl"></i>
-          </a>
-        </div>
+    <footer class="footer">
+      <div class="footer__id">
+        <p class="footer__name">Ramadanzah</p>
+        <p class="footer__role">Web &amp; IoT Developer</p>
+        <p class="footer__copy">&copy; 2026 Ramadanzah</p>
       </div>
+
+      <nav class="footer__nav" aria-label="Kontak dan media sosial">
+        <a class="footer__mail" href="mailto:halo@ramadanzah.com">halo@ramadanzah.com</a>
+        <ul class="socials">
+          <li>
+            <a class="social" href="https://github.com/ramadanzah-dev" rel="me noopener" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </footer>
+  </div>
 
-    <!-- Scripts -->
-    <script>
-      // Tahun berjalan
-      document.getElementById("year").textContent = new Date().getFullYear();
-
-      // Toggle menu mobile
-      const btn = document.getElementById("mobile-menu-btn");
-      const menu = document.getElementById("mobile-menu");
-      const mobileLinks = document.querySelectorAll(".mobile-link");
-
-      btn.addEventListener("click", () => {
-        const isOpen = !menu.classList.toggle("hidden");
-        btn.setAttribute("aria-expanded", String(isOpen));
-      });
-
-      mobileLinks.forEach((link) => {
-        link.addEventListener("click", () => {
-          menu.classList.add("hidden");
-          btn.setAttribute("aria-expanded", "false");
-        });
-      });
-
-      // Logika ganti tema
-      const themeToggleBtn = document.getElementById("theme-toggle");
-      const mobileThemeToggleBtn = document.getElementById(
-        "mobile-theme-toggle",
-      );
-
-      function toggleTheme() {
-        if (document.documentElement.classList.contains("dark")) {
-          document.documentElement.classList.remove("dark");
-          localStorage.setItem("theme", "light");
-        } else {
-          document.documentElement.classList.add("dark");
-          localStorage.setItem("theme", "dark");
-        }
-      }
-
-      themeToggleBtn.addEventListener("click", toggleTheme);
-      mobileThemeToggleBtn.addEventListener("click", toggleTheme);
-    </script>
-  </body>
+  <script src="script.js" defer></script>
+</body>
 </html>
