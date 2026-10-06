@@ -5,7 +5,7 @@
    Format ISO 8601 dengan zona waktu (WIB = +07:00).
    ========================================================= */
 const MAINTENANCE_START = new Date("2026-10-06T20:00:00+07:00");
-const MAINTENANCE_END = new Date("2026-10-09T21:00:00+07:00");
+const MAINTENANCE_END = new Date("2026-10-30T21:00:00+07:00");
 /* ========================================================= */
 
 const unitEls = {
